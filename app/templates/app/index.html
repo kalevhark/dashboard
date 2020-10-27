@@ -79,6 +79,7 @@
   <script src="https://code.highcharts.com/modules/export-data.js"></script>
   <script src="https://code.highcharts.com/modules/accessibility.js"></script>
   <script src="https://code.highcharts.com/modules/pattern-fill.js"></script>
+  <script src="https://code.highcharts.com/modules/annotations.js"></script>
 </head>
 <body>
 <div class="wrapper">
@@ -145,11 +146,10 @@
   <div class="counter col_third">
     <img width="50" height="60" src="{% static 'app/images/outdoors.png' %}" />
     <h1
-            class="timer count-title count-number color-{{ ilmateenistus_data.airtemperature_colorclass }} format_celsius"
-            data-to="{{ ilmateenistus_data.airtemperature }}"
-            data-speed="1000"
+            id="ilmateenistus_airtemperature"
+            class="timer count-title count-number format_celsius"
     >
-      {{ ilmateenistus_data.airtemperature }}
+      -
     </h1>
     <p class="count-text ">Õhutemperatuur (Ilmateenistus)</p>
   </div>
@@ -157,15 +157,13 @@
   <div class="counter col_third end">
     <img width="50" height="60" src="{% static 'app/images/outdoors.png' %}" />
     <h1
-            class="timer count-title count-number color-{{ ilmateenistus_data.relativehumidity_colorclass }} format_percentage"
-            data-to="{{ ilmateenistus_data.relativehumidity }}"
-            data-speed="1000"
+            id="ilmateenistus_relativehumidity"
+            class="timer count-title count-number format_percentage"
     >
-      {{ ilmateenistus_data.relativehumidity }}
+      -
     </h1>
     <p class="count-text ">Õhuniiskus (Ilmateenistus)</p>
   </div>
-  {{ YRno_forecast_data }}
 </div>
 
 
@@ -183,7 +181,31 @@ $(document).ready(function() {
 });
 
 function update_index_ilmateenistus_now_data(chart_24h) {
-  // Küsime ilmateenistuse andmed ja täiendame dashboardi
+  // Küsime yrno andmed ja täiendame graafikut
+  $.ajax({
+    url: "{% url 'app:index_ilmateenistus_now_data' %}",
+    dataType: 'json',
+    timeout: 300000,
+	beforeSend: function() {
+      // $("#loaderDiv3").show();
+    },
+    success: function (data) {
+      console.log(data);
+      let elAirtemperature = $('#ilmateenistus_airtemperature')
+      elAirtemperature.text(data.airtemperature);
+      elAirtemperature.addClass('color-' + data.airtemperature_colorclass);
+      let elRelativehumidity = $('#ilmateenistus_relativehumidity')
+      elRelativehumidity.text(data.relativehumidity);
+      // divClass.classList.remove('color' + (i - 1));
+      elRelativehumidity.addClass('color-' + data.relativehumidity_colorclass);
+    },
+    error: function (XMLHttpRequest, textstatus, errorThrown) {
+	  alert(textstatus);
+    },
+	complete: function () {
+	  // $("#loaderDiv3").hide();
+	}
+  });
 };
 
 function update_index_yrno_next12h_data(chart) {
@@ -209,8 +231,8 @@ function update_index_yrno_next12h_data(chart) {
 	  // $("#loaderDiv3").hide();
 	}
   });
+};
 
-}
 </script>
 
 </html>

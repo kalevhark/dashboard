@@ -409,33 +409,13 @@ def index(request):
             tankStatus_temp_now_colorset
         )
 
-    # Ilmateenistuse hetkemõõtmised
-    ilmateenistus_data = {}
-    ilmateenistus_data_resp = ilm_Ilmateenistus_now()
-    if ilmateenistus_data_resp:
-        ilmateenistus_data['airtemperature'] = ilmateenistus_data_resp['airtemperature']
-        ilmateenistus_data['relativehumidity'] = ilmateenistus_data_resp['relativehumidity']
-        airtemperature_colorset = {'default': 'blue', 'levels': [(0, 'red')]}
-        ilmateenistus_data['airtemperature_colorclass'] = colorclass(
-            ilmateenistus_data['airtemperature'],
-            airtemperature_colorset
-        )
-        relativehumidity_colorset = {'default': 'red', 'levels': [(60, 'blue'), (40, 'green')]}
-        ilmateenistus_data['relativehumidity_colorclass'] = colorclass(
-            ilmateenistus_data['relativehumidity'],
-            relativehumidity_colorset
-        )
-
-    # yr.no ennustus
-    YRno_forecast_data = ilm_YRno_forecast(request, 12)
-
     # 24h chart data
     chart_24h = index_chart24h_data(
         request,
         date_today,
+        aquarea_data,
         date_today_consum,
         date_yesterday_consum,
-        YRno_forecast_data
     )
 
     # last 7d chart data
@@ -455,22 +435,17 @@ def index(request):
 
     context = {
         'date_today': date_today,
-        'date_today_last7days': date_today_last7days,
+        # 'date_today_last7days': date_today_last7days,
         'aquarea_data': aquarea_data,
-        'ilmateenistus_data': ilmateenistus_data,
-        'YRno_forecast_data': YRno_forecast_data,
+        # 'ilmateenistus_data': ilmateenistus_data,
+        # 'YRno_forecast_data': YRno_forecast_data,
         'chart_24h': chart_24h,
     }
     # return JsonResponse(context)
     return render(request, 'app/index.html', context)
 
-# dashboardi avakuva
-# def index(request):
-#     context = index_data(request)
-#     return render(request, 'app/index.html', context)
 
-
-def index_chart24h_data(request, date_today, date_today_consum, date_yesterday_consum, YRno_forecast_data):
+def index_chart24h_data(request, date_today, aquarea_data, date_today_consum, date_yesterday_consum):
     # Loob 24h graafiku
     # Aquearea näitab hetketunni tarbimist - näiteks kell 00:30 näidatakse viimase poole tunni tarbimist
     # 12 viimast tundi = hetketund ja 11 eelmist
@@ -491,29 +466,22 @@ def index_chart24h_data(request, date_today, date_today_consum, date_yesterday_c
     last_12hour_consum_heat = (date_yesterday_consum_heat + date_today_consum_heat)[last12_range_start:last12_range_end]
     last_12hour_consum_tank = (date_yesterday_consum_tank + date_today_consum_tank)[last12_range_start:last12_range_end]
     last_12hour_outdoor_temp = (date_yesterday_outdoor_temp + date_today_outdoor_temp)[last12_range_start:last12_range_end]
-    # Järgnevad 12h
-    # YRno_forecast_data = ilm_YRno_forecast(request)
+
+    # Teeme tühja graafiku järgnevad 12h jaoks
     next_12hour_outdoor_temp = 12*[None]
-    # next_12hour_outdoor_temp = [
-    #     hour['data']['instant']['details']['air_temperature']
-    #     # hour
-    #     for hour
-    #     in YRno_forecast_data['timeseries_12h']
-    # ]
     next_12hour_outdoor_prec_min = 12*[None]
-    # next_12hour_outdoor_prec_min = [
-    #     hour['data']['next_1_hours']['details']['precipitation_amount_min']
-    #     for hour
-    #     in YRno_forecast_data['timeseries_12h']
-    # ]
     next_12hour_outdoor_prec_err = 12*[None]
-    # next_12hour_outdoor_prec_err = [
-    #     hour['data']['next_1_hours']['details']['precipitation_amount_max']-
-    #     hour['data']['next_1_hours']['details']['precipitation_amount_min']
-    #     for hour
-    #     in YRno_forecast_data['timeseries_12h']
-    # ]
-    # next_12hour_outdoor_temp = 12 * [None] + [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]
+
+    # title_date = f'<strong>{date_today.strftime("%d.%m.%Y %H:%M")}</strong>'
+    # aquarea_temp_val = aquarea_data["outdoor_now_aquarea"]
+    # aquarea_temp_cls = aquarea_data["outdoor_now_aquarea_colorclass"]
+    # title_aquarea_temp = f'<span class="color-{aquarea_temp_cls}">{aquarea_temp_val}°C</span>'
+    # title = ' '.join(
+    #     [
+    #         title_date,
+    #         title_aquarea_temp
+    #     ]
+    # )
 
     chart = {
         'chart': {
@@ -577,6 +545,22 @@ def index_chart24h_data(request, date_today, date_today_consum, date_yesterday_c
             'headerFormat': '<b>{point.x}</b><br/>',
             'pointFormat': '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
         },
+        'annotations': [{
+            'labels': [{
+                'point': {
+                    'x': 11 + date_today.minute/60,
+                    'xAxis': 0,
+                    'y': aquarea_data['outdoor_now_aquarea'],
+                    'yAxis': 0
+                },
+                'text': '11°C'
+            }],
+            'labelOptions': {
+                'backgroundColor': 'rgba(255,255,255,0.5)',
+                'borderColor': 'silver',
+                'style': {'fontSize': '2em'},
+            }
+        }],
         'plotOptions': {
             'column': {
                 'stacking': 'normal',
@@ -675,3 +659,22 @@ def index_yrno_next12h_data(request):
         'next_12hour_outdoor_prec_err': next_12hour_outdoor_prec_err
     }
     return JsonResponse(data)
+
+def index_ilmateenistus_now_data(request):
+    # Ilmateenistuse hetkemõõtmised
+    ilmateenistus_data = {}
+    ilmateenistus_data_resp = ilm_Ilmateenistus_now()
+    if ilmateenistus_data_resp:
+        ilmateenistus_data['airtemperature'] = ilmateenistus_data_resp['airtemperature']
+        ilmateenistus_data['relativehumidity'] = ilmateenistus_data_resp['relativehumidity']
+        airtemperature_colorset = {'default': 'blue', 'levels': [(0, 'red')]}
+        ilmateenistus_data['airtemperature_colorclass'] = colorclass(
+            ilmateenistus_data['airtemperature'],
+            airtemperature_colorset
+        )
+        relativehumidity_colorset = {'default': 'red', 'levels': [(60, 'blue'), (40, 'green')]}
+        ilmateenistus_data['relativehumidity_colorclass'] = colorclass(
+            ilmateenistus_data['relativehumidity'],
+            relativehumidity_colorset
+        )
+    return JsonResponse(ilmateenistus_data)
