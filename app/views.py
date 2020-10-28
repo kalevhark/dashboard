@@ -16,6 +16,8 @@ from .models import Log
 DEBUG = False
 DEGREE_CELSIUS = u'\N{DEGREE CELSIUS}'
 
+m2rgiga = lambda i: ("+" if i > 0 else "") + str(i)
+
 request_kwargs = {
     "login_url": "https://aquarea-smart.panasonic.com/remote/v1/api/auth/login",
     "logout_url": 'https://aquarea-smart.panasonic.com/remote/v1/api/auth/logout',
@@ -472,23 +474,24 @@ def index_chart24h_data(request, date_today, aquarea_data, date_today_consum, da
     next_12hour_outdoor_prec_min = 12*[None]
     next_12hour_outdoor_prec_err = 12*[None]
 
-    # title_date = f'<strong>{date_today.strftime("%d.%m.%Y %H:%M")}</strong>'
-    # aquarea_temp_val = aquarea_data["outdoor_now_aquarea"]
-    # aquarea_temp_cls = aquarea_data["outdoor_now_aquarea_colorclass"]
-    # title_aquarea_temp = f'<span class="color-{aquarea_temp_cls}">{aquarea_temp_val}°C</span>'
-    # title = ' '.join(
-    #     [
-    #         title_date,
-    #         title_aquarea_temp
-    #     ]
-    # )
+    title_date = f'<strong>{date_today.strftime("%d.%m.%Y %H:%M")}</strong>'
+    aquarea_temp_val = m2rgiga(aquarea_data["outdoor_now_aquarea"])
+    aquarea_temp_cls = aquarea_data["outdoor_now_aquarea_colorclass"]
+    title_aquarea_temp = f'<span class="color-{aquarea_temp_cls}">{aquarea_temp_val}°C</span>'
+    title = ' '.join(
+        [
+            title_date,
+            title_aquarea_temp
+        ]
+    )
 
     chart = {
         'chart': {
             'type': 'column'
         },
         'title': {
-            'text': ''
+            'useHTML': True,
+            'text': title
         },
         'xAxis': {
             'categories': categories,
@@ -521,14 +524,14 @@ def index_chart24h_data(request, date_today, aquarea_data, date_today_consum, da
                 }
             },
             'title': {
-                'text': 'Välistemperatuur',
+                'text': 'Välistemperatuur (Sulevi 9a)',
                 'style': {
                     # 'color': 'Highcharts.getOptions().colors[1]'
                 }
             }
         }, { # Secondary yAxis
             'title': {
-                'text': 'Kulu/Sademed',
+                'text': 'Kulu kW/h /Sademed mm',
                 'style': {
                     # 'color': 'Highcharts.getOptions().colors[0]'
                 }
@@ -550,15 +553,15 @@ def index_chart24h_data(request, date_today, aquarea_data, date_today_consum, da
                 'point': {
                     'x': 11 + date_today.minute/60,
                     'xAxis': 0,
-                    'y': aquarea_data['outdoor_now_aquarea'],
+                    'y': aquarea_temp_val,
                     'yAxis': 0
                 },
-                'text': '11°C'
+                'text': f'{aquarea_temp_val}°C'
             }],
             'labelOptions': {
                 'backgroundColor': 'rgba(255,255,255,0.5)',
                 'borderColor': 'silver',
-                'style': {'fontSize': '2em'},
+                'style': {'fontSize': '1em'},
             }
         }],
         'plotOptions': {
