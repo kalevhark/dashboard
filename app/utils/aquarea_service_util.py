@@ -5,6 +5,7 @@ import re
 import requests
 import urllib3
 
+from django.conf import settings
 from bs4 import BeautifulSoup
 import pytz
 
@@ -48,8 +49,8 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
     deviceId = '008007B197792584001434545313831373030634345373130434345373138313931304300000000'
 
     params = {
-        'var.loginId': 'kalevhark@gmail.com',
-        'var.password': '130449fb1c084aed40031ba18b5fb47e',
+        'var.loginId': settings.AQUAREA_USR,
+        'var.password': settings.AQUAREA_PWD_SERVICE,
         'var.inputOmit': 'false'
     }
 
