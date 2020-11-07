@@ -138,29 +138,56 @@ def aquarea_log(
         timestamp=timestamp_now(),
         # verbose=False
 ):
-    # Küsime andmed Aquarea APIst
-    deviceGuid = session.cookies['selectedDeviceId']
-    resp = session.get(
-        f'https://aquarea-smart.panasonic.com/remote/v1/api/consumption/{deviceGuid}?{period}={date_string}&_={timestamp}',
-        verify=False
-    )
-    tarbimisandmed = json.loads(resp.text)
-    tarbimisandmed['timestamp'] = timestamp
-    tarbimisandmed['dateString'] = date_string
-    if check_log_dates(tarbimisandmed):
-        # Salvestame andmed JSON formaadis
-        print('salvestame:', date_string, end=' id:')
-        new_log = Log.objects.create(data=tarbimisandmed)
-        print(new_log)
+    log_data = Log.objects.filter(data__dateString=date_string)
+    if log_data:
+        tarbimisandmed = log_data.first().data
+        print('andmed andmebaasist')
     else:
-        print('ei salvesta')
+        # Küsime andmed Aquarea APIst
+        deviceGuid = session.cookies['selectedDeviceId']
+        resp = session.get(
+            f'https://aquarea-smart.panasonic.com/remote/v1/api/consumption/{deviceGuid}?{period}={date_string}&_={timestamp}',
+            verify=False
+        )
+        tarbimisandmed = json.loads(resp.text)
+        tarbimisandmed['timestamp'] = timestamp
+        tarbimisandmed['dateString'] = date_string
+        print(date_string, end='')
+        if check_log_dates(tarbimisandmed):
+            # Salvestame andmed JSON formaadis
+            new_log = Log.objects.create(data=tarbimisandmed)
+            print(' salvestame id:', new_log)
+        else:
+            print(' ei salvesta')
+        print('andmed APIst')
     return tarbimisandmed
+
+# Andmebaasi korrastamine
+def check_db():
+    # Kustutame topeltread
+    del_rows = 0
+    lastSeenId = float('-Inf')
+    rows = Log.objects.all().order_by('data__dateString')
+    for row in rows:
+        if row.data['dateString'] == lastSeenId:
+            # print(row.id, row.data['dateString'])
+            row.delete()
+            del_rows += 1
+        else:
+            lastSeenId = row.data['dateString']
+    data = {
+        'del_rows': del_rows,
+    }
+    return JsonResponse(data)
+
 
 # KÜsib andmed Aquarea APIst
 def log(request, date_string):
     log_data = Log.objects.filter(data__dateString=date_string)
+    print(date_string, end='')
     if log_data:
         tarbimisandmed = log_data.first().data
+        print(' andmed andmebaasist')
     else:
         tarbimisandmed = {}
         # Mis perioodi kohta
@@ -182,6 +209,7 @@ def log(request, date_string):
         )
         # Logime välja
         end = aquarea_logout(session, request_kwargs)
+        print(' andmed APIst')
     return JsonResponse(tarbimisandmed)
 
 # Tagastab Aquaerea hetkenäitajad
@@ -573,6 +601,7 @@ def index_chart24h_data(request, date_today, aquarea_data, date_today_consum, da
             }
         },
         'series': [{
+            'id': 'last_12hour_outdoor_temp',
             'name': 'Välistemperatuur',
             'type': 'spline',
             'data': last_12hour_outdoor_temp, # [-7.0, -6.9, 9.5, 14.5, 18.2, 21.5, -25.2, -26.5, 23.3, 18.3, 13.9, 9.6],
@@ -583,6 +612,7 @@ def index_chart24h_data(request, date_today, aquarea_data, date_today_consum, da
             'color': '#FF3333',
             'negativeColor': '#48AFE8'
         }, {
+            'id': 'next_12hour_outdoor_temp',
             'name': 'Välistemperatuur (prognoos)',
             'type': 'spline',
             'data': 12*[None] + next_12hour_outdoor_temp,
@@ -594,16 +624,21 @@ def index_chart24h_data(request, date_today, aquarea_data, date_today_consum, da
             'color': '#FF3333',
             'negativeColor': '#48AFE8'
         }, {
+            'id': 'last_12hour_consum_heat',
             'name': 'Küte',
             'yAxis': 1,
             'data': last_12hour_consum_heat,
-            'color': '#F5C725'
+            'color': '#F5C725',
+            'zIndex': 2,
         }, {
+            'id': 'last_12hour_consum_tank',
             'name': 'Vesi',
             'yAxis': 1,
             'data': last_12hour_consum_tank,
-            'color': '#FF8135'
+            'color': '#FF8135',
+            'zIndex': 2,
         }, {
+            'id': 'next_12hour_outdoor_prec_err',
             'type': 'column',
             'name': 'Sademed (prognoos err)',
             'data': 12*[None] + next_12hour_outdoor_prec_err,
@@ -623,6 +658,7 @@ def index_chart24h_data(request, date_today, aquarea_data, date_today_consum, da
                 'valueSuffix': ' mm'
             }
 	    }, {
+            'id': 'next_12hour_outdoor_prec_min',
             'type': 'column',
             'name': 'Sademed (prognoos min)',
             'data': 12*[None] + next_12hour_outdoor_prec_min,
@@ -631,6 +667,26 @@ def index_chart24h_data(request, date_today, aquarea_data, date_today_consum, da
             'grouping': False,
             'tooltip': {
                 'valueSuffix': ' mm'
+            }
+	    }, {
+            'id': 'tot_gen',
+            'type': 'area',
+            'name': 'Test',
+            'data': [],
+            'yAxis': 1,
+            'zIndex': 1,
+            'color': {
+                'linearGradient': { 'x1': 0, 'x2': 0, 'y1': 0, 'y2': 1 },
+                'stops': [
+                    [0, '#00ff00'],
+                    [1, '#ffffff']
+                ]
+            },
+            'lineWidth': 1,
+            'fillOpacity': 0.5,
+            # 'grouping': False,
+            'tooltip': {
+                'valueSuffix': ' x'
             }
 	    }]
     }
@@ -681,3 +737,8 @@ def index_ilmateenistus_now_data(request):
             relativehumidity_colorset
         )
     return JsonResponse(ilmateenistus_data)
+
+import app.utils.aquarea_service_util as aqserv
+def index_aquarea_service_lasthours(request):
+    logData = aqserv.loe_logiandmed_veebist(hours=11, verbose=False)
+    return JsonResponse(logData)

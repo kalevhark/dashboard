@@ -177,6 +177,7 @@ $(document).ready(function() {
   var chart_24h = Highcharts.chart('container', chart_24h_data);
   update_index_ilmateenistus_now_data(chart_24h);
   update_index_yrno_next12h_data(chart_24h);
+  update_index_aquarea_service_lasthours(chart_24h);
   // serie.forEach(function(point) {console.log(point.y)});
 });
 
@@ -196,7 +197,7 @@ function update_index_ilmateenistus_now_data(chart_24h) {
       elAirtemperature.addClass('color-' + data.airtemperature_colorclass);
       let elRelativehumidity = $('#ilmateenistus_relativehumidity')
       elRelativehumidity.text(data.relativehumidity);
-      // divClass.classList.remove('color' + (i - 1));
+      // divClass.classList.remove('color-' + (i - 1));
       elRelativehumidity.addClass('color-' + data.relativehumidity_colorclass);
     },
     error: function (XMLHttpRequest, textstatus, errorThrown) {
@@ -220,9 +221,9 @@ function update_index_yrno_next12h_data(chart) {
     success: function (data) {
       console.log(data);
       const arr_12h_nulls = new Array(12).fill(null);
-      chart.series[1].update({data: arr_12h_nulls.concat(data.next_12hour_outdoor_temp)});
-      chart.series[4].update({data: arr_12h_nulls.concat(data.next_12hour_outdoor_prec_err)});
-      chart.series[5].update({data: arr_12h_nulls.concat(data.next_12hour_outdoor_prec_min)});
+      chart.get('next_12hour_outdoor_temp').update({data: arr_12h_nulls.concat(data.next_12hour_outdoor_temp)});
+      chart.get('next_12hour_outdoor_prec_err').update({data: arr_12h_nulls.concat(data.next_12hour_outdoor_prec_err)});
+      chart.get('next_12hour_outdoor_prec_min').update({data: arr_12h_nulls.concat(data.next_12hour_outdoor_prec_min)});
     },
     error: function (XMLHttpRequest, textstatus, errorThrown) {
 	  alert(textstatus);
@@ -233,6 +234,29 @@ function update_index_yrno_next12h_data(chart) {
   });
 };
 
+function update_index_aquarea_service_lasthours(chart) {
+  // Küsime aquarea andmed ja täiendame graafikut
+  $.ajax({
+    url: "{% url 'app:index_aquarea_service_lasthours' %}",
+    dataType: 'json',
+    timeout: 300000,
+	beforeSend: function() {
+      // $("#loaderDiv3").show();
+    },
+    success: function (data) {
+      console.log(data);
+      const arr_12h_nulls = new Array(12).fill(null);
+      // chart.series[0].update({data: data.act_outd_temp}); // 5 minuti kaupa on liiga sakiline
+      chart.get('tot_gen').update({data: data.tot_gen});
+    },
+    error: function (XMLHttpRequest, textstatus, errorThrown) {
+	  alert(textstatus);
+    },
+	complete: function () {
+	  // $("#loaderDiv3").hide();
+	}
+  });
+};
 </script>
 
 </html>
