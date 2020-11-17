@@ -87,31 +87,77 @@
     <div id="container"></div>
   </figure>
 </div>
+<!--Ruumide andmed-->
+<div class="wrapper">
+  <div class="counter col_third">
+    <img width="50" height="60" src="{% static 'app/images/temperature.png' %}" />
+    <h1
+            id="HeatArea1_t_actual"
+            class="timer count-title count-number format_celsius"
+    >
+      -
+    </h1>
+     <p class="count-text ">
+       <span id="HeatArea1_heatarea_name"></span>-><span id="HeatArea1_t_target"></span>
+     </p>
+  </div>
+
+  <div class="counter col_third">
+    <img width="50" height="60" src="{% static 'app/images/temperature.png' %}" />
+    <h1
+            id="HeatArea2_t_actual"
+            class="timer count-title count-number format_celsius"
+    >
+      -
+    </h1>
+     <p class="count-text ">
+       <span id="HeatArea2_heatarea_name"></span>-><span id="HeatArea2_t_target"></span>
+     </p>
+  </div>
+
+  <div class="counter col_third end">
+    <img width="50" height="60" src="{% static 'app/images/temperature.png' %}" />
+    <h1
+            id="HeatArea3_t_actual"
+            class="timer count-title count-number format_celsius"
+    >
+      -
+    </h1>
+     <p class="count-text ">
+       <span id="HeatArea3_heatarea_name"></span>-><span id="HeatArea3_t_target"></span>
+     </p>
+  </div>
+</div>
+
 <div class="wrapper">
   <div class="counter col_third">
     <img width="50" height="60" src="{% static 'app/images/heat_pump.png' %}" />
     <h1
             id="zone1Status_temp_now"
-            class="timer count-title count-number color-{{ aquarea_data.zone1Status_temp_now_colorclass }} format_celsius"
+            class="timer count-title count-number {% if aquarea_data.zone1Status_operationStatus %}color-red{% endif %} format_celsius"
             data-to="{{ aquarea_data.zone1Status_temp_now }}"
             data-speed="1000"
     >
       {{ aquarea_data.zone1Status_temp_now }}
     </h1>
-     <p class="count-text ">Majaring</p>
+     <p class="count-text ">
+       Majaring{% if aquarea_data.zone1Status_operationStatus %}-><span id="zone1Status_temp_target"></span>{% endif %}
+     </p>
   </div>
 
   <div class="counter col_third">
     <img width="50" height="60"  src="{% static 'app/images/heat_pump.png' %}" />
     <h1
             id="zone2Status_temp_now"
-            class="timer count-title count-number color-{{ aquarea_data.zone2Status_temp_now_colorclass }} format_celsius"
+            class="timer count-title count-number {% if aquarea_data.zone2Status_operationStatus %}color-red{% endif %} format_celsius"
             data-to="{{ aquarea_data.zone2Status_temp_now }}"
             data-speed="1000"
     >
       {{ aquarea_data.zone2Status_temp_now }}
     </h1>
-    <p class="count-text ">Põrandaküte</p>
+    <p class="count-text ">
+      Põrandaküte{% if aquarea_data.zone2Status_operationStatus %}-><span id="zone2Status_temp_target"></span>{% endif %}
+    </p>
   </div>
 
   <div
@@ -175,16 +221,17 @@ $(document).ready(function() {
   const chart_24h_data = JSON.parse(document.getElementById('chart_24h').textContent);
   // console.log(chart_24h);
   var chart_24h = Highcharts.chart('container', chart_24h_data);
-  update_index_ilmateenistus_now_data(chart_24h);
-  update_index_yrno_next12h_data(chart_24h);
-  update_index_aquarea_service_lasthours(chart_24h);
+  update_ilmateenistus_now_data(chart_24h);
+  update_yrno_next12h_data(chart_24h);
+  update_aquarea_service_lasthours(chart_24h);
+  update_ezr_data();
   // serie.forEach(function(point) {console.log(point.y)});
 });
 
-function update_index_ilmateenistus_now_data(chart_24h) {
+function update_ilmateenistus_now_data(chart_24h) {
   // Küsime yrno andmed ja täiendame graafikut
   $.ajax({
-    url: "{% url 'app:index_ilmateenistus_now_data' %}",
+    url: "{% url 'app:get_ilmateenistus_now' %}",
     dataType: 'json',
     timeout: 300000,
 	beforeSend: function() {
@@ -209,10 +256,10 @@ function update_index_ilmateenistus_now_data(chart_24h) {
   });
 };
 
-function update_index_yrno_next12h_data(chart) {
+function update_yrno_next12h_data(chart) {
   // Küsime yrno andmed ja täiendame graafikut
   $.ajax({
-    url: "{% url 'app:index_yrno_next12h_data' %}",
+    url: "{% url 'app:get_yrno_forecast' %}",
     dataType: 'json',
     timeout: 300000,
 	beforeSend: function() {
@@ -234,10 +281,10 @@ function update_index_yrno_next12h_data(chart) {
   });
 };
 
-function update_index_aquarea_service_lasthours(chart) {
+function update_aquarea_service_lasthours(chart) {
   // Küsime aquarea andmed ja täiendame graafikut
   $.ajax({
-    url: "{% url 'app:index_aquarea_service_lasthours' %}",
+    url: "{% url 'app:get_aquarea_serv_data' %}",
     dataType: 'json',
     timeout: 300000,
 	beforeSend: function() {
@@ -245,9 +292,63 @@ function update_index_aquarea_service_lasthours(chart) {
     },
     success: function (data) {
       console.log(data);
-      const arr_12h_nulls = new Array(12).fill(null);
+      // const arr_12h_nulls = new Array(12).fill(null);
       // chart.series[0].update({data: data.act_outd_temp}); // 5 minuti kaupa on liiga sakiline
       chart.get('tot_gen').update({data: data.tot_gen});
+      let elZone1Status_temp_target = $('#zone1Status_temp_target')
+      elZone1Status_temp_target.text(data.status.z1_water_temp_target);
+      let elZone2Status_temp_target = $('#zone2Status_temp_target')
+      elZone2Status_temp_target.text(data.status.z2_water_temp_target);
+    },
+    error: function (XMLHttpRequest, textstatus, errorThrown) {
+	  alert(textstatus);
+    },
+	complete: function () {
+	  // $("#loaderDiv3").hide();
+	}
+  });
+};
+
+function update_ezr_data() {
+  // Küsime ezr andmed ja täiendame graafikut
+  $.ajax({
+    url: "{% url 'app:get_ezr_data' %}",
+    dataType: 'json',
+    timeout: 300000,
+	beforeSend: function() {
+      // $("#loaderDiv3").show();
+    },
+    success: function (data) {
+      console.log(data);
+      let elHeatArea1_t_actual = $('#HeatArea1_t_actual');
+      elHeatArea1_t_actual.text(data.nr1.t_actual);
+      if (data.nr1.heatctrl_state == '1') {
+        elHeatArea1_t_actual.addClass('color-red');
+      };
+      let elHeatArea1_t_target = $('#HeatArea1_t_target');
+      elHeatArea1_t_target.text(data.nr1.t_target);
+      let elHeatArea1_heatarea_name = $('#HeatArea1_heatarea_name')
+      elHeatArea1_heatarea_name.text(data.nr1.heatarea_name);
+
+      let elHeatArea2_t_actual = $('#HeatArea2_t_actual');
+      elHeatArea2_t_actual.text(data.nr2.t_actual);
+      if (data.nr2.heatctrl_state == '1') {
+        elHeatArea2_t_actual.addClass('color-red');
+      };
+      let elHeatArea2_t_target = $('#HeatArea2_t_target');
+      elHeatArea2_t_target.text(data.nr2.t_target);
+      let elHeatArea2_heatarea_name = $('#HeatArea2_heatarea_name')
+      elHeatArea2_heatarea_name.text(data.nr2.heatarea_name);
+
+      let elHeatArea3_t_actual = $('#HeatArea3_t_actual');
+      elHeatArea3_t_actual.text(data.nr3.t_actual);
+      if (data.nr3.heatctrl_state == '1') {
+        elHeatArea3_t_actual.addClass('color-red');
+      };
+      let elHeatArea3_t_target = $('#HeatArea3_t_target');
+      elHeatArea3_t_target.text(data.nr3.t_target);
+      let elHeatArea3_heatarea_name = $('#HeatArea3_heatarea_name')
+      elHeatArea3_heatarea_name.text(data.nr3.heatarea_name);
     },
     error: function (XMLHttpRequest, textstatus, errorThrown) {
 	  alert(textstatus);

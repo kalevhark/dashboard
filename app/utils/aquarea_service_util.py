@@ -30,7 +30,7 @@ def loe_logiandmed_failist(filename):
 
 
 def loe_logiandmed_veebist(hours=12, verbose=False):
-    dateTime_last_hours = datetime.now() - timedelta(hours=hours)
+    dateTime_last_hours = datetime.now() - timedelta(hours=hours-1)
     dateTime_last_hours_fullhour = datetime(
         dateTime_last_hours.year,
         dateTime_last_hours.month,
@@ -138,10 +138,14 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
     act_outd_temp = []
     z1_water_temp = []
     z2_water_temp = []
+    z1_water_temp_target = []
+    z2_water_temp_target = []
+    tank_temp = []
+    tank_temp_target = []
     heat_con = []
-    # heat_gen = []
+    heat_gen = []
     tank_con = []
-    # tank_gen = []
+    tank_gen = []
     tot_gen = []
 
     for row in logiandmed_dict:
@@ -150,11 +154,19 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
         act_outd_temp.append([cat_date, float(logiandmed_dict[row][34])])
         z1_water_temp.append([cat_date, float(logiandmed_dict[row][37])])
         z2_water_temp.append([cat_date, float(logiandmed_dict[row][38])])
+        z1_water_temp_target.append([cat_date, float(logiandmed_dict[row][39])])
+        z2_water_temp_target.append([cat_date, float(logiandmed_dict[row][40])])
+        tank_temp.append([cat_date, float(logiandmed_dict[row][33])])
+        tank_temp_target.append([cat_date, float(logiandmed_dict[row][11])])
         heat_con_row = float(logiandmed_dict[row][65])
         heat_con.append([cat_date, heat_con_row])
         tank_con_row = float(logiandmed_dict[row][69])
         tank_con.append([cat_date, tank_con_row])
-        tot_gen_row = heat_con_row + tank_con_row
+        heat_gen_row = float(logiandmed_dict[row][66])
+        heat_gen.append([cat_date, heat_gen_row])
+        tank_gen_row = float(logiandmed_dict[row][70])
+        tank_gen.append([cat_date, tank_gen_row])
+        tot_gen_row = heat_gen_row + tank_gen_row
         tot_gen.append([
             cat_date,
             tot_gen_row if tot_gen_row else None
@@ -165,17 +177,103 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
                 row_date.strftime('%H:%M'),
                 [logiandmed_dict[row][el] for el in elements]
             )
-
+        status = {
+            'datetime': pytz.timezone('Europe/Tallinn').localize(row_date),
+            'z1_water_temp': z1_water_temp[-1][1],
+            'z2_water_temp': z2_water_temp[-1][1],
+            'z1_water_temp_target': z1_water_temp_target[-1][1],
+            'z2_water_temp_target': z2_water_temp_target[-1][1],
+            'tank_temp': tank_temp[-1][1],
+            'tank_temp_target': tank_temp_target[-1][1]
+        }
     chart_data = {
         'act_outd_temp': act_outd_temp,
         'z1_water_temp': z1_water_temp,
         'z2_water_temp': z2_water_temp,
         'heat_con': heat_con,
         'tank_con': tank_con,
-        'tot_gen': tot_gen
+        'heat_gen': heat_gen,
+        'tank_gen': tank_gen,
+        'tot_gen': tot_gen,
+        'status': status
     }
     return chart_data
 
 
 if __name__ == "__main__":
     data = loe_logiandmed_veebist(hours=11, verbose=True)
+
+# Parameters
+"""
+0 Operation [1:Off, 2:On]
+1 Dry concrete [1:Off, 2:On]
+2 Mode [1:Tank only, 2:Heat, 3:Cool, 8:Auto, 9:Auto(Heat), 10:Auto(Cool)]
+3 Tank [1:Off, 2:On]
+4 Zone1-Zone2 On-Off [1:On-Off, 2:Off-On, 3:On-On]
+5 SHP control [1:Disable, 2:Enable]
+6 SHP flow control (forbid ΔT) [1:Disable, 2:Enable]
+7 Zone1: (water shift/water/room/pool) set temperature for heat mode [°C]
+8 Zone1: (water shift/water/room) set temperature for cool mode [°C]
+9 Zone2: (water shift/water/room/pool) set temperature for heat mode [°C]
+10 Zone2: (water shift/water/room) set temperature for cool  mode [°C]
+11 Tank water set temperature [°C]
+12 Co-efficient frequency control [%]
+13 Current Lv [Lv]
+14 External SW [1:Close, 2:Open]
+15 Heat-Cool SW [1:Heat, 2:Cool]
+16 Powerful (Actual) [1:Off, 2:On]
+17 Quiet (Actual) [1:Off, 2:On]
+18 3-way valve [1:Room, 2:Tank]
+19 Defrost (Actual) [1:Off, 2:On]
+20 Room heater (Actual) [1:Off, 2:On]
+21 Tank heater (Actual) [1:Off, 2:On]
+22 Solar (Actual) [1:Off, 2:On]
+23 Bivalent (Actual) [1:Off, 2:On]
+24 Current error status [0:No error pop up screen in RC LCD, 1:Error pop up screen in RC LCD]
+25 Backup heater 1 status (Actual) [1:Off, 2:On]
+26 Backup heater 2 status (Actual) [1:Off, 2:On]
+27 Backup heater 3 status (Actual) [1:Off, 2:On]
+28 2 Zone pump 1 status (Actual) [1:Off, 2:On]
+29 2 Zone pump 2 status (Actual) [1:Off, 2:On]
+30 Sterilization status (Actual) [1:Off, 2:On]
+31 Zone1: Actual (water outlet/room/pool) temperature [°C]
+32 Zone2: Actual (water outlet/room/pool) temperature [°C]
+33 Actual tank temperature [°C]
+34 Actual outdoor temperature [°C]
+35 Inlet water temperature [°C]
+36 Outlet water temperature [°C]
+37 Zone1: Water temperature [°C]
+38 Zone2: Water temperature [°C]
+39 Zone1: Water temperature (Target) [°C]
+40 Zone2: Water temperature (Target) [°C]
+41 Buffer tank: Water temperature [°C]
+42 Solar: Water temperature [°C]
+43 Pool: Water temperature [°C]
+44 Outlet water temperature (Target) [°C]
+45 Outlet 2 temperature [°C]
+46 Discharge temperature [°C]
+47 Room thermostat internal sensor temperature [°C]
+48 Indoor piping temperature [°C]
+49 Outdoor piping temperature [°C]
+50 Defrost temperature [°C]
+51 EVA outlet temperature [°C]
+52 Bypass outlet temperature [°C]
+53 IPM temperature [°C]
+54 High pressure [kgf/cm2]
+55 Low pressure [kgf/cm2]
+56 Outdoor current [A]
+57 Compressor frequency [Hz]
+58 Pump flow rate [L/min]
+59 Pump speed [r/min]
+60 Pump duty [duty]
+61 Fan motor speed 1 [r/min]
+62 Fan motor speed 2 [r/min]
+63 2 Zone mixing valve 1 opening [sec]
+64 2 Zone mixing valve 2 opening [sec]
+65 Heat mode energy consumption [kW]
+66 Heat mode energy generation [kW]
+67 Cool mode energy consumption [kW]
+68 Cool mode energy generation [kW]
+69 Tank mode energy consumption [kW]
+70 Tank mode energy generation [kW]
+"""

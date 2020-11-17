@@ -7,15 +7,17 @@ app_name = 'app'
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('index_yrno_next12h_data', views.index_yrno_next12h_data, name='index_yrno_next12h_data'),
-    path('index_ilmateenistus_now_data', views.index_ilmateenistus_now_data, name='index_ilmateenistus_now_data'),
-    path('index_aquarea_service_lasthours', views.index_aquarea_service_lasthours, name='index_aquarea_service_lasthours'),
-    # path('container_date_today_24hours', views.container_date_today_24hours, name='container_date_today_24hours'),
-    path('ilm/', views.ilm_Ilmateenistus_now, name='ilm_praegu_ilmateenistusest'),
-    # path('index_data', views.index_data, name='index_data'),
-    path('log/<str:date_string>/', views.log, name='log'),
-    path('status/', views.status, name='status'),
-    path('today/', views.today, name='today'),
-    path('weekly_timer/', views.weekly_timer, name='weekly_timer')
+    path('get_yrno_forecast', views.get_yrno_forecast, name='get_yrno_forecast'),
+    path('get_ilmateenistus_now', views.get_ilmateenistus_now, name='get_ilmateenistus_now'),
+    path('get_aquarea_serv_data', views.get_aquarea_serv_data, name='get_aquarea_serv_data'),
+    path('get_ezr_data', views.get_ezr_data, name='get_ezr_data'),
+    path('ilm/', views.get_ilmateenistus_now, name='ilm'),
+    path('aquarea/', views.get_aquarea_serv_data, name='aquarea'),
+    path('ezr/', views.get_ezr_data, name='ezr'),
+    path('yrno/', views.get_yrno_forecast, name='yrno'),
+    # path('log/<str:date_string>/', views.log, name='log'),
+    # path('status/', views.status, name='status'),
+    # path('today/', views.today, name='today'),
+    # path('weekly_timer/', views.weekly_timer, name='weekly_timer')
 ]
 
