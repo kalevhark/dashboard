@@ -2,7 +2,7 @@
 <html lang="en">
 {% load static %}
 <head>
-  <meta charset="UTF-8">
+  <meta HTTP-EQUIV="content-type" CONTENT="text/html; charset=UTF-8" />
   <title>Aquarea Data</title>
 <!--  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" />-->
   <style>
@@ -19,13 +19,15 @@
     .color-blue {color: #48AFE8;}
     .color-green {}
     .color-red {color: #FF3333;}
-    .color-yellow {background-color: yellow;}
 
     .format_celsius::after {
       content: "°C";
     }
     .format_percentage::after {
       content: "%";
+    }
+    .format_target::before {
+      content: "\219D";
     }
 
     /*-=-=-=-=-=-=-=-=-=-=-=- */
@@ -57,8 +59,15 @@
     .wrapper { width: 980px; margin: 30px auto; position: relative;}
     .counter { background-color: #ffffff; padding: 20px 0; border-radius: 5px;}
     .count-title { font-size: 5em; font-weight: normal;  margin-top: 10px; margin-bottom: 0; text-align: center; }
-    .count-text { font-size: 1em; font-weight: normal;  margin-top: 10px; margin-bottom: 0; text-align: center; }
+    .count-text { font-size: 1.5em; font-weight: normal;  margin-top: 10px; margin-bottom: 0; text-align: center; }
     .fa-2x { margin: 0 auto; float: none; display: table; color: #4ad1e5; }
+
+    .aquarea_consum_table th, td {
+      text-align: right;
+      vertical-align: middle;
+      padding: 5px;
+      font-size: 2em;
+    }
 
     #container {
       height: 400px;
@@ -98,7 +107,7 @@
       -
     </h1>
      <p class="count-text ">
-       <span id="HeatArea1_heatarea_name"></span>-><span id="HeatArea1_t_target"></span>
+       <span id="HeatArea1_heatarea_name"></span> <span class="format_target format_celsius" id="HeatArea1_t_target"></span>
      </p>
   </div>
 
@@ -111,7 +120,7 @@
       -
     </h1>
      <p class="count-text ">
-       <span id="HeatArea2_heatarea_name"></span>-><span id="HeatArea2_t_target"></span>
+       <span id="HeatArea2_heatarea_name"></span> <span class="format_target format_celsius" id="HeatArea2_t_target"></span>
      </p>
   </div>
 
@@ -124,7 +133,7 @@
       -
     </h1>
      <p class="count-text ">
-       <span id="HeatArea3_heatarea_name"></span>-><span id="HeatArea3_t_target"></span>
+       <span id="HeatArea3_heatarea_name"></span> <span class="format_target format_celsius" id="HeatArea3_t_target"></span>
      </p>
   </div>
 </div>
@@ -133,46 +142,40 @@
   <div class="counter col_third">
     <img width="50" height="60" src="{% static 'app/images/heat_pump.png' %}" />
     <h1
-            id="zone1Status_temp_now"
-            class="timer count-title count-number {% if aquarea_data.zone1Status_operationStatus %}color-red{% endif %} format_celsius"
-            data-to="{{ aquarea_data.zone1Status_temp_now }}"
-            data-speed="1000"
+            id="z1_water_temp"
+            class="timer count-title count-number format_celsius"
     >
-      {{ aquarea_data.zone1Status_temp_now }}
+      -
     </h1>
      <p class="count-text ">
-       Majaring{% if aquarea_data.zone1Status_operationStatus %}-><span id="zone1Status_temp_target"></span>{% endif %}
+       Majaring <span class="format_target format_celsius" id="zone1Status_temp_target"></span>
      </p>
   </div>
 
   <div class="counter col_third">
     <img width="50" height="60"  src="{% static 'app/images/heat_pump.png' %}" />
     <h1
-            id="zone2Status_temp_now"
-            class="timer count-title count-number {% if aquarea_data.zone2Status_operationStatus %}color-red{% endif %} format_celsius"
-            data-to="{{ aquarea_data.zone2Status_temp_now }}"
-            data-speed="1000"
+            id="z2_water_temp"
+            class="timer count-title count-number format_celsius"
     >
-      {{ aquarea_data.zone2Status_temp_now }}
+      -
     </h1>
     <p class="count-text ">
-      Põrandaküte{% if aquarea_data.zone2Status_operationStatus %}-><span id="zone2Status_temp_target"></span>{% endif %}
+      Põrandaküte <span class="format_target format_celsius" id="zone2Status_temp_target"></span>
     </p>
   </div>
 
-  <div
-          class="counter col_third end {% if aquarea_data.tankStatus_operationStatus %}color-yellow{% endif %}"
-  >
+  <div class="counter col_third end">
     <img width="50" height="60" src="{% static 'app/images/icon_tank.png' %}" />
     <h1
             id="tankStatus_temp_now"
-            class="timer count-title count-number color-{{ aquarea_data.tankStatus_temp_now_colorclass }} format_celsius"
-            data-to="{{ aquarea_data.tankStatus_temp_now }}"
-            data-speed="1000"
+            class="timer count-title count-number format_celsius"
     >
-      {{ aquarea_data.tankStatus_temp_now }}
+      -
     </h1>
-    <p class="count-text ">Tarbevesi{% if aquarea_data.tankStatus_operationStatus %}->{{ aquarea_data.tankStatus_temp_set }}{% endif %}</p>
+    <p class="count-text">
+      Tarbevesi <span class="format_target format_celsius" id="tankStatus_temp_target"></span>
+    </p>
   </div>
 </div>
 
@@ -180,11 +183,10 @@
   <div class="counter col_third">
     <img width="50" height="60" src="{% static 'app/images/outdoors.png' %}" />
     <h1
-            class="timer count-title count-number color-{{ aquarea_data.outdoor_now_aquarea_colorclass }} format_celsius"
-            data-to="{{ aquarea_data.outdoor_now_aquarea }}"
-            data-speed="1000"
+            id="act_outd_temp"
+            class="timer count-title count-number format_celsius"
     >
-      {{ aquarea_data.outdoor_now_aquarea }}
+      -
     </h1>
     <p class="count-text ">Õhutemperatuur (S9a)</p>
   </div>
@@ -197,7 +199,7 @@
     >
       -
     </h1>
-    <p class="count-text ">Õhutemperatuur (Ilmateenistus)</p>
+    <p class="count-text ">Õhutemperatuur (Valga)</p>
   </div>
 
   <div class="counter col_third end">
@@ -208,156 +210,87 @@
     >
       -
     </h1>
-    <p class="count-text ">Õhuniiskus (Ilmateenistus)</p>
+    <p class="count-text ">Õhuniiskus (Valga)</p>
   </div>
 </div>
 
+<div class="wrapper" id="aquarea_consum_table">
+  <table class="aquarea_consum_table">
+    <thead>
+			<tr>
+    		<th>Periood</th>
+        <th>Kulu (kW/h)</th>
+    		<th>Küte (kW/h)</th>
+				<th>Vesi (kW/h)</th>
+  		</tr>
+    </thead>
+    <tr>
+      <td>Täna kuni <span id="aquarea_consum_date"></span></td>
+      <td><span id="t2na_tot"></span></td>
+      <td><span id="t2na_heat"></span></td>
+      <td><span id="t2na_tank"></span></td>
+    </tr>
+    <tr>
+      <td>Eile</td>
+      <td><span id="eile_tot"></span></td>
+      <td><span id="eile_heat"></span></td>
+      <td><span id="eile_tank"></span></td>
+    </tr>
+    <tr>
+      <td>Sel kuul</td>
+      <td><span id="kuu_tot"></span></td>
+      <td><span id="kuu_heat"></span></td>
+      <td><span id="kuu_tank"></span></td>
+    </tr>
+    <tr>
+      <td>Eelmise aasta samal kuul</td>
+      <td><span id="kuu_aasta_tagasi_tot"></span></td>
+      <td><span id="kuu_aasta_tagasi_heat"></span></td>
+      <td><span id="kuu_aasta_tagasi_tank"></span></td>
+    </tr>
+    <tr>
+      <td>Sel perioodil (alates 01.07)</td>
+      <td><span id="jooksva_perioodi_tot"></span></td>
+      <td><span id="jooksva_perioodi_heat"></span></td>
+      <td><span id="jooksva_perioodi_tank"></span></td>
+    </tr>
+    <tr>
+      <td>Eelmisel perioodil</td>
+      <td><span id="eelmise_perioodi_tot"></span></td>
+      <td><span id="eelmise_perioodi_heat"></span></td>
+      <td><span id="eelmise_perioodi_tank"></span></td>
+    </tr>
+  </table>
+</div>
 
 </body>
 
 {{ chart_24h|json_script:"chart_24h" }}
+
+<script src="{% static 'app/js/app.js' %}"></script>
 <script>
 $(document).ready(function() {
   const chart_24h_data = JSON.parse(document.getElementById('chart_24h').textContent);
-  // console.log(chart_24h);
   var chart_24h = Highcharts.chart('container', chart_24h_data);
-  update_ilmateenistus_now_data(chart_24h);
-  update_yrno_next12h_data(chart_24h);
-  update_aquarea_service_lasthours(chart_24h);
-  update_ezr_data();
-  // serie.forEach(function(point) {console.log(point.y)});
+
+  const url_get_xaxis_categories = "{% url 'app:get_xaxis_categories' %}";
+  update_xaxis_categories(url_get_xaxis_categories, chart_24h);
+
+  const url_get_ilmateenistus_now = "{% url 'app:get_ilmateenistus_now' %}";
+  update_ilmateenistus_now_data(url_get_ilmateenistus_now, chart_24h);
+
+  const url_get_yrno_forecast = "{% url 'app:get_yrno_forecast' %}";
+  update_yrno_next12h_data(url_get_yrno_forecast, chart_24h);
+
+  const url_get_aquarea_serv_data = "{% url 'app:get_aquarea_serv_data' %}";
+  update_aquarea_serv_data(url_get_aquarea_serv_data, chart_24h);
+
+  const url_get_aquarea_smrt_data = "{% url 'app:get_aquarea_smrt_data' %}";
+  update_aquarea_smrt_data(url_get_aquarea_smrt_data, chart_24h);
+
+  const url_get_ezr_data = "{% url 'app:get_ezr_data' %}";
+  update_ezr_data(url_get_ezr_data);
 });
-
-function update_ilmateenistus_now_data(chart_24h) {
-  // Küsime yrno andmed ja täiendame graafikut
-  $.ajax({
-    url: "{% url 'app:get_ilmateenistus_now' %}",
-    dataType: 'json',
-    timeout: 300000,
-	beforeSend: function() {
-      // $("#loaderDiv3").show();
-    },
-    success: function (data) {
-      console.log(data);
-      let elAirtemperature = $('#ilmateenistus_airtemperature')
-      elAirtemperature.text(data.airtemperature);
-      elAirtemperature.addClass('color-' + data.airtemperature_colorclass);
-      let elRelativehumidity = $('#ilmateenistus_relativehumidity')
-      elRelativehumidity.text(data.relativehumidity);
-      // divClass.classList.remove('color-' + (i - 1));
-      elRelativehumidity.addClass('color-' + data.relativehumidity_colorclass);
-    },
-    error: function (XMLHttpRequest, textstatus, errorThrown) {
-	  alert(textstatus);
-    },
-	complete: function () {
-	  // $("#loaderDiv3").hide();
-	}
-  });
-};
-
-function update_yrno_next12h_data(chart) {
-  // Küsime yrno andmed ja täiendame graafikut
-  $.ajax({
-    url: "{% url 'app:get_yrno_forecast' %}",
-    dataType: 'json',
-    timeout: 300000,
-	beforeSend: function() {
-      // $("#loaderDiv3").show();
-    },
-    success: function (data) {
-      console.log(data);
-      const arr_12h_nulls = new Array(12).fill(null);
-      chart.get('next_12hour_outdoor_temp').update({data: arr_12h_nulls.concat(data.next_12hour_outdoor_temp)});
-      chart.get('next_12hour_outdoor_prec_err').update({data: arr_12h_nulls.concat(data.next_12hour_outdoor_prec_err)});
-      chart.get('next_12hour_outdoor_prec_min').update({data: arr_12h_nulls.concat(data.next_12hour_outdoor_prec_min)});
-    },
-    error: function (XMLHttpRequest, textstatus, errorThrown) {
-	  alert(textstatus);
-    },
-	complete: function () {
-	  // $("#loaderDiv3").hide();
-	}
-  });
-};
-
-function update_aquarea_service_lasthours(chart) {
-  // Küsime aquarea andmed ja täiendame graafikut
-  $.ajax({
-    url: "{% url 'app:get_aquarea_serv_data' %}",
-    dataType: 'json',
-    timeout: 300000,
-	beforeSend: function() {
-      // $("#loaderDiv3").show();
-    },
-    success: function (data) {
-      console.log(data);
-      // const arr_12h_nulls = new Array(12).fill(null);
-      // chart.series[0].update({data: data.act_outd_temp}); // 5 minuti kaupa on liiga sakiline
-      chart.get('tot_gen').update({data: data.tot_gen});
-      let elZone1Status_temp_target = $('#zone1Status_temp_target')
-      elZone1Status_temp_target.text(data.status.z1_water_temp_target);
-      let elZone2Status_temp_target = $('#zone2Status_temp_target')
-      elZone2Status_temp_target.text(data.status.z2_water_temp_target);
-    },
-    error: function (XMLHttpRequest, textstatus, errorThrown) {
-	  alert(textstatus);
-    },
-	complete: function () {
-	  // $("#loaderDiv3").hide();
-	}
-  });
-};
-
-function update_ezr_data() {
-  // Küsime ezr andmed ja täiendame graafikut
-  $.ajax({
-    url: "{% url 'app:get_ezr_data' %}",
-    dataType: 'json',
-    timeout: 300000,
-	beforeSend: function() {
-      // $("#loaderDiv3").show();
-    },
-    success: function (data) {
-      console.log(data);
-      let elHeatArea1_t_actual = $('#HeatArea1_t_actual');
-      elHeatArea1_t_actual.text(data.nr1.t_actual);
-      if (data.nr1.heatctrl_state == '1') {
-        elHeatArea1_t_actual.addClass('color-red');
-      };
-      let elHeatArea1_t_target = $('#HeatArea1_t_target');
-      elHeatArea1_t_target.text(data.nr1.t_target);
-      let elHeatArea1_heatarea_name = $('#HeatArea1_heatarea_name')
-      elHeatArea1_heatarea_name.text(data.nr1.heatarea_name);
-
-      let elHeatArea2_t_actual = $('#HeatArea2_t_actual');
-      elHeatArea2_t_actual.text(data.nr2.t_actual);
-      if (data.nr2.heatctrl_state == '1') {
-        elHeatArea2_t_actual.addClass('color-red');
-      };
-      let elHeatArea2_t_target = $('#HeatArea2_t_target');
-      elHeatArea2_t_target.text(data.nr2.t_target);
-      let elHeatArea2_heatarea_name = $('#HeatArea2_heatarea_name')
-      elHeatArea2_heatarea_name.text(data.nr2.heatarea_name);
-
-      let elHeatArea3_t_actual = $('#HeatArea3_t_actual');
-      elHeatArea3_t_actual.text(data.nr3.t_actual);
-      if (data.nr3.heatctrl_state == '1') {
-        elHeatArea3_t_actual.addClass('color-red');
-      };
-      let elHeatArea3_t_target = $('#HeatArea3_t_target');
-      elHeatArea3_t_target.text(data.nr3.t_target);
-      let elHeatArea3_heatarea_name = $('#HeatArea3_heatarea_name')
-      elHeatArea3_heatarea_name.text(data.nr3.heatarea_name);
-    },
-    error: function (XMLHttpRequest, textstatus, errorThrown) {
-	  alert(textstatus);
-    },
-	complete: function () {
-	  // $("#loaderDiv3").hide();
-	}
-  });
-};
 </script>
 
 </html>

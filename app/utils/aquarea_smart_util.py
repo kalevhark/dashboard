@@ -104,27 +104,37 @@ def logout(session):
 
 #
 # Tagastab Aquarea kulu
-#   kasutamine: consumption(session, 'month', '2020-07', timestamp_now(), True)
+#   kasutamine: consumption(session, '2020-07', timestamp_now(), True)
 # datestring valikud:
 #   date=2019-08-27
 #   month=2019-08
 #   year=2019
-#   week=2019-08-26 NB! monday = today - timedelta(days=today.weekday())
+#   week=2019-08-26 NB! monday = today - timedelta(days=today.weekday()) / ei kasuta!
 #
 def consum(
         session,
-        period='year',
-        date_string=datetime.now().year,
+        # period='year',
+        date_string=str(datetime.now().year),
         timestamp=timestamp_now(),
         # verbose=False
 ):
     log_data = Log.objects.filter(data__dateString=date_string)
     if log_data:
         tarbimisandmed = log_data.first().data
-        print('andmed andmebaasist')
+        print(date_string, 'andmed andmebaasist')
     else:
         # Küsime andmed Aquarea APIst
         deviceGuid = session.cookies['selectedDeviceId']
+
+        # Periood liik
+        date_string_splits_count = len(date_string.split('-'))
+        if date_string_splits_count == 3:
+            period = 'date'
+        elif date_string_splits_count == 2:
+            period = 'month'
+        else:
+            period = 'year'
+
         resp = session.get(
             f'https://aquarea-smart.panasonic.com/remote/v1/api/consumption/{deviceGuid}?{period}={date_string}&_={timestamp}',
             verify=False
@@ -139,7 +149,7 @@ def consum(
             print(' salvestame id:', new_log)
         else:
             print(' ei salvesta')
-        print('andmed APIst')
+        print(date_string, 'andmed APIst')
     return tarbimisandmed
 
 # Andmebaasi korrastamine
@@ -155,9 +165,35 @@ def check_db():
             del_rows += 1
         else:
             lastSeenId = row.data['dateString']
+
+    session = login()
+
+    # Kontrollime andmed koosseisu
+    algus = datetime(2020, 11, 22)
+    while algus < datetime.now() - timedelta(days=1):
+        date_string = algus.strftime('%Y-%m-%d')
+        log = Log.objects.filter(data__dateString=date_string)
+        if not log:  # Andmed juba salvestatud?
+            print('Hangime', date_string)
+            consum(session, date_string)
+            # break
+        algus += timedelta(days=1)
+
+    # y = 2020
+    # for m in range(1, 11):
+    #     date_string = f'{y}-{m:02}'
+    #     log = Log.objects.filter(data__dateString=date_string)
+    #     if not log:  # Andmed juba salvestatud?
+    #         print('Hangime', date_string)
+    #         consum(session, date_string)
+
+    _ = logout(session)
+
     data = {
         'del_rows': del_rows,
     }
+
+    print(data)
     return JsonResponse(data)
 
 
@@ -170,21 +206,12 @@ def log(request, date_string):
         print(' andmed andmebaasist')
     else:
         tarbimisandmed = {}
-        # Mis perioodi kohta
-        if len(date_string) == 10:
-            period = 'date'
-        elif len(date_string) == 7:
-            period = 'month'
-        elif len(date_string) == 4:
-            period = 'year'
-        else:
-            return JsonResponse(tarbimisandmed) # date_string on vigane
+
         # Logime sisse
         session = login()
         # Küsime andmed
         tarbimisandmed = consum(
             session,
-            period=period,
             date_string=date_string
         )
         # Logime välja
@@ -213,22 +240,23 @@ def get_status(session):
     # _ = logout(session)
     return status_data
 
-# Tänase päeva Aquarea andmed
-def today(request):
-    # Logime sisse
-    session = login()
-    # Küsime andmed
-    today = datetime.now()
-    date_string = f'{today.year}-{today.month:02d}-{today.day:02d}'
-    status = consum(session, period='date', date_string=date_string)
-    # Logime välja
-    end = logout(session)
-    return JsonResponse(status)
+# # Tänase päeva Aquarea andmed
+# def today(request=None):
+#     # Logime sisse
+#     session = login()
+#     # Küsime andmed
+#     today = datetime.now()
+#     date_string = f'{today.year}-{today.month:02d}-{today.day:02d}'
+#     status = consum(session, date_string=date_string)
+#     # Logime välja
+#     end = logout(session)
+#     return JsonResponse(status)
 
 # Tagastab Aquarea nädalagraafiku
-def weekly_timer(request):
+def weekly_timer(session=None):
     # Logime sisse
-    session = login()
+    # session = login()
+
     # Küsime andmed
     url = 'https://aquarea-smart.panasonic.com/remote/weekly_timer'
     accessToken = session.cookies['accessToken']
@@ -288,7 +316,5 @@ def weekly_timer(request):
 
     # Teisendame sringist jsoni nädalaseadistuse andmed
     weekly_timer_data = json.loads(raw_data_string)
-    return JsonResponse(
-        weekly_timer_data['weeklytimer'][0]['timer'],
-        safe=False
-    )
+
+    return weekly_timer_data['weeklytimer'][0]['timer'] # , safe=False

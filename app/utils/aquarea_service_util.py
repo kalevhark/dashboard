@@ -147,6 +147,7 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
     tank_con = []
     tank_gen = []
     tot_gen = []
+    tot_gen_plus = []
 
     for row in logiandmed_dict:
         row_date = datetime.fromtimestamp(int(row) / 1000)
@@ -171,6 +172,11 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
             cat_date,
             tot_gen_row if tot_gen_row else None
         ])
+        tot_gen_plus_row = tot_gen_row - (heat_con_row + tank_con_row)
+        tot_gen_plus.append([
+            cat_date,
+            tot_gen_plus_row if tot_gen_plus_row > 0 else None # TODO: kui on negatiivne tootlus
+        ])
         if verbose:
             print(
                 cat_date,
@@ -179,6 +185,7 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
             )
         status = {
             'datetime': pytz.timezone('Europe/Tallinn').localize(row_date),
+            'act_outd_temp': act_outd_temp[-1][1],
             'z1_water_temp': z1_water_temp[-1][1],
             'z2_water_temp': z2_water_temp[-1][1],
             'z1_water_temp_target': z1_water_temp_target[-1][1],
@@ -186,6 +193,7 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
             'tank_temp': tank_temp[-1][1],
             'tank_temp_target': tank_temp_target[-1][1]
         }
+
     chart_data = {
         'act_outd_temp': act_outd_temp,
         'z1_water_temp': z1_water_temp,
@@ -195,6 +203,7 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
         'heat_gen': heat_gen,
         'tank_gen': tank_gen,
         'tot_gen': tot_gen,
+        'tot_gen_plus': tot_gen_plus,
         'status': status
     }
     return chart_data
