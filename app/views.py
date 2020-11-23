@@ -210,6 +210,7 @@ def get_ezr_data(request=None):
 # dashboardi avaleht
 def index(request):
     date_today = datetime.now()
+    date_today = pytz.timezone('Europe/Tallinn').localize(date_today)
     categories = get_xaxis_categories()
 
     title = f'<strong>{date_today.strftime("%d.%m.%Y %H:%M")}</strong>'
