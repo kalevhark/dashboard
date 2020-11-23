@@ -11,10 +11,12 @@ import os
 
 import django
 
-from django.core.asgi import get_asgi_application
+# from django.core.asgi import get_asgi_application
+from channels.routing import get_default_application
 
 django.setup()
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dashboard.settings')
 
-application = get_asgi_application()
+# application = get_asgi_application()
+application = get_default_application()
