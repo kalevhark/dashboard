@@ -145,7 +145,7 @@ function update_aquarea_smrt_data(url, chart) {
       const ho = new Intl.DateTimeFormat('en', { hour: '2-digit', hour12: false }).format(d);
       const mi = new Intl.DateTimeFormat('en', { minute: 'numeric' }).format(d).padStart(2, '0');
       // dateString = `${da}.${mo}.${ye} ${ho}:${mi}`;
-      dateString = `${ho}:${mi}`;
+      dateString = `${ho % 24}:${mi}`;
 
       // console.log(data.status.status[0].zoneStatus[0].operationStatus);
       if (data.status.status[0].zoneStatus[0].operationStatus == 1) {
