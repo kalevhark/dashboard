@@ -8,11 +8,11 @@ function update_xaxis_categories(url, chart) {
       // $("#loaderDiv3").show();
     },
     success: function (data) {
-      console.log(data);
+      // console.log(data);
       chart.xAxis[0].setCategories(data);
     },
     error: function (XMLHttpRequest, textstatus, errorThrown) {
-	  alert(textstatus);
+	  console.log(XMLHttpRequest, textstatus, errorThrown);
     },
 	complete: function () {
 	  // $("#loaderDiv3").hide();
@@ -40,7 +40,7 @@ function update_ilmateenistus_now_data(url, chart) {
       elRelativehumidity.addClass('color-' + data.relativehumidity_colorclass);
     },
     error: function (XMLHttpRequest, textstatus, errorThrown) {
-	  alert(textstatus);
+	  console.log(XMLHttpRequest, textstatus, errorThrown);
     },
 	complete: function () {
 	  // $("#loaderDiv3").hide();
@@ -65,7 +65,7 @@ function update_yrno_next12h_data(url, chart) {
       chart.get('next_12hour_outdoor_prec_min').update({data: arr_12h_nulls.concat(data.next_12hour_outdoor_prec_min)});
     },
     error: function (XMLHttpRequest, textstatus, errorThrown) {
-	  alert(textstatus);
+	  console.log(XMLHttpRequest, textstatus, errorThrown);
     },
 	complete: function () {
 	  // $("#loaderDiv3").hide();
@@ -115,7 +115,7 @@ function update_aquarea_serv_data(url, chart) {
       };
     },
     error: function (XMLHttpRequest, textstatus, errorThrown) {
-	  alert(textstatus);
+	  console.log(XMLHttpRequest, textstatus, errorThrown);
     },
 	complete: function () {
 	  // $("#loaderDiv3").hide();
@@ -183,6 +183,10 @@ function update_aquarea_smrt_data(url, chart) {
       $('#kuu_heat').text(data.kuu_heat.toFixed(1));
       $('#kuu_tank').text(data.kuu_tank.toFixed(1));
 
+      $('#kuu_eelmine_tot').text((data.kuu_eelmine_heat+data.kuu_eelmine_tank).toFixed(1));
+      $('#kuu_eelmine_heat').text(data.kuu_eelmine_heat.toFixed(1));
+      $('#kuu_eelmine_tank').text(data.kuu_eelmine_tank.toFixed(1));
+
       $('#kuu_aasta_tagasi_tot').text((data.kuu_aasta_tagasi_heat+data.kuu_aasta_tagasi_tank).toFixed(1));
       $('#kuu_aasta_tagasi_heat').text(data.kuu_aasta_tagasi_heat.toFixed(1));
       $('#kuu_aasta_tagasi_tank').text(data.kuu_aasta_tagasi_tank.toFixed(1));
@@ -196,7 +200,7 @@ function update_aquarea_smrt_data(url, chart) {
       $('#eelmise_perioodi_tank').text(data.eelmise_perioodi_tank.toFixed(1));
     },
     error: function (XMLHttpRequest, textstatus, errorThrown) {
-	  alert(textstatus);
+	  console.log(XMLHttpRequest, textstatus, errorThrown);
     },
 	complete: function () {
 	  // $("#loaderDiv3").hide();
@@ -246,7 +250,7 @@ function update_ezr_data(url) {
       elHeatArea3_heatarea_name.text(data.nr3.heatarea_name);
     },
     error: function (XMLHttpRequest, textstatus, errorThrown) {
-	  alert(textstatus);
+	  console.log(XMLHttpRequest, textstatus, errorThrown);
     },
 	complete: function () {
 	  // $("#loaderDiv3").hide();

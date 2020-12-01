@@ -20,6 +20,11 @@
     .color-green {}
     .color-red {color: #FF3333;}
 
+    .frame_red {
+      border-style: solid;
+      border-color: #FF3333;
+    }
+
     .format_celsius::after {
       content: "°C";
     }
@@ -98,7 +103,7 @@
 </div>
 <!--Ruumide andmed-->
 <div class="wrapper">
-  <div class="counter col_third">
+  <div id="HeatArea1_t_actual_frame" class="counter col_third">
     <img width="50" height="60" src="{% static 'app/images/temperature.png' %}" />
     <h1
             id="HeatArea1_t_actual"
@@ -241,6 +246,12 @@
       <td><span id="kuu_tot"></span></td>
       <td><span id="kuu_heat"></span></td>
       <td><span id="kuu_tank"></span></td>
+    </tr>
+    <tr>
+      <td>Eelmisel kuul</td>
+      <td><span id="kuu_eelmine_tot"></span></td>
+      <td><span id="kuu_eelmine_heat"></span></td>
+      <td><span id="kuu_eelmine_tank"></span></td>
     </tr>
     <tr>
       <td>Eelmise aasta samal kuul</td>

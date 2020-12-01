@@ -61,9 +61,14 @@ def get_ilmateenistus_now(request=None):
     href = 'http://www.ilmateenistus.ee/ilma_andmed/xml/observations.php'
     r = requests.get(href)
     try:
-        root = ET.fromstring(r.text)
+        root = ET.fromstring(r.text.strip())
     except:
-        return None
+        # Kontrollime kas vaatlusandmed ikkagi olemas
+        observation_exists = r.text.find('<observations')
+        if observation_exists > 0:
+            root = ET.fromstring(r.text[observation_exists:])
+        else:
+            return None
     ilmaandmed = dict()
     # Mõõtmise aeg
     dt = datetime.fromtimestamp(int(root.attrib['timestamp']))
@@ -107,7 +112,11 @@ def get_yrno_forecast(request=None, hours=12):
         'lon': lon,
         'altitude': altitude
     }
-    headers = {}
+    headers = {
+        "User-Agent": "Mozilla/5.0 (iPad; CPU OS 11_0 like Mac OS X) AppleWebKit/604.1.34 (KHTML, like Gecko) Version/11.0 Mobile/15A5341f Safari/604.1",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "Accept": "*/*",
+    }
     r = requests.get(
         url,
         headers=headers,
@@ -418,16 +427,19 @@ def get_aquarea_smrt_data(request):
     eile_consum = aqsmrt.consum(session, eile_string)
     eile_heat = sum(filter(None, eile_consum['dateData'][0]['dataSets'][0]['data'][0]['values']))
     eile_tank = sum(filter(None, eile_consum['dateData'][0]['dataSets'][0]['data'][2]['values']))
+
     # Jooksva kuu kulu
     kuu_string = t2na.strftime('%Y-%m')
     kuu_consum = aqsmrt.consum(session, kuu_string)
     kuu_heat = sum(filter(None, kuu_consum['dateData'][0]['dataSets'][0]['data'][0]['values']))
     kuu_tank = sum(filter(None, kuu_consum['dateData'][0]['dataSets'][0]['data'][2]['values']))
+
     # Eelmise kuu kulu
     kuu_eelmine_string = kuu_eelmine.strftime('%Y-%m')
     kuu_eelmine_consum = aqsmrt.consum(session, kuu_eelmine_string)
     kuu_eelmine_heat = sum(filter(None, kuu_eelmine_consum['dateData'][0]['dataSets'][0]['data'][0]['values']))
     kuu_eelmine_tank = sum(filter(None, kuu_eelmine_consum['dateData'][0]['dataSets'][0]['data'][2]['values']))
+
     # Eelmise aasta sama kuu kulu
     kuu_aasta_tagasi_string = datetime(jooksev_aasta - 1, jooksev_kuu, 1).strftime('%Y-%m')
     kuu_aasta_tagasi_consum = aqsmrt.consum(session, kuu_aasta_tagasi_string)
@@ -546,6 +558,8 @@ def get_aquarea_smrt_data(request):
         'eile_tank': eile_tank,
         'kuu_heat': kuu_heat,
         'kuu_tank': kuu_tank,
+        'kuu_eelmine_heat': kuu_eelmine_heat,
+        'kuu_eelmine_tank': kuu_eelmine_tank,
         'kuu_aasta_tagasi_heat': kuu_aasta_tagasi_heat,
         'kuu_aasta_tagasi_tank': kuu_aasta_tagasi_tank,
         'jooksva_perioodi_heat': jooksva_perioodi_heat,
