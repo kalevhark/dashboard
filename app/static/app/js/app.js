@@ -228,6 +228,7 @@ function update_ezr_data(url) {
       elHeatArea1_t_target.text(data.nr1.t_target);
       let elHeatArea1_heatarea_name = $('#HeatArea1_heatarea_name')
       elHeatArea1_heatarea_name.text(data.nr1.heatarea_name);
+      document.getElementById('HeatArea1_actor_percent').value = data.nr1.actor_percent;
 
       let elHeatArea2_t_actual = $('#HeatArea2_t_actual');
       elHeatArea2_t_actual.text(data.nr2.t_actual);
@@ -238,6 +239,7 @@ function update_ezr_data(url) {
       elHeatArea2_t_target.text(data.nr2.t_target);
       let elHeatArea2_heatarea_name = $('#HeatArea2_heatarea_name');
       elHeatArea2_heatarea_name.text(data.nr2.heatarea_name);
+      document.getElementById('HeatArea2_actor_percent').value = data.nr2.actor_percent;
 
       let elHeatArea3_t_actual = $('#HeatArea3_t_actual');
       elHeatArea3_t_actual.text(data.nr3.t_actual);
@@ -248,6 +250,7 @@ function update_ezr_data(url) {
       elHeatArea3_t_target.text(data.nr3.t_target);
       let elHeatArea3_heatarea_name = $('#HeatArea3_heatarea_name');
       elHeatArea3_heatarea_name.text(data.nr3.heatarea_name);
+      document.getElementById('HeatArea3_actor_percent').value = data.nr3.actor_percent;
     },
     error: function (XMLHttpRequest, textstatus, errorThrown) {
 	  console.log(XMLHttpRequest, textstatus, errorThrown);
