@@ -63,7 +63,7 @@
 
     .wrapper { width: 980px; margin: 30px auto; position: relative;}
     .counter { background-color: #ffffff; padding: 20px 0; border-radius: 5px;}
-    .count-title { font-size: 5em; font-weight: normal;  margin-top: 10px; margin-bottom: 0; text-align: center; }
+    .count-title { font-size: 4em; font-weight: normal;  margin-top: 10px; margin-bottom: 0; text-align: center; }
     .count-text { font-size: 1.5em; font-weight: normal;  margin-top: 10px; margin-bottom: 0; text-align: center; }
     .fa-2x { margin: 0 auto; float: none; display: table; color: #4ad1e5; }
 
@@ -103,7 +103,7 @@
 </div>
 <!--Ruumide andmed-->
 <div class="wrapper">
-  <div id="HeatArea1_t_actual_frame" class="counter col_third">
+  <div id="HeatArea1_t_actual_frame" class="counter col_fourth">
     <img width="50" height="60" src="{% static 'app/images/temperature.png' %}" />
     <h1
             id="HeatArea1_t_actual"
@@ -119,7 +119,7 @@
     </div>
   </div>
 
-  <div class="counter col_third">
+  <div class="counter col_fourth">
     <img width="50" height="60" src="{% static 'app/images/temperature.png' %}" />
     <h1
             id="HeatArea2_t_actual"
@@ -135,7 +135,7 @@
     </div>
   </div>
 
-  <div class="counter col_third end">
+  <div class="counter col_fourth">
     <img width="50" height="60" src="{% static 'app/images/temperature.png' %}" />
     <h1
             id="HeatArea3_t_actual"
@@ -150,10 +150,26 @@
       <input type="range" id="HeatArea3_actor_percent" min="0" max="100" value="10" disabled>
     </div>
   </div>
+
+  <div class="counter col_fourth end">
+    <img width="50" height="60" src="{% static 'app/images/temperature.png' %}" />
+    <h1
+            id="HeatArea4_t_actual"
+            class="timer count-title count-number format_celsius"
+    >
+      -
+    </h1>
+    <div class="count-text ">
+      <span id="HeatArea4_heatarea_name"></span> <span class="format_target format_celsius" id="HeatArea4_t_target"></span>
+    </div>
+    <div>
+      <input type="range" id="HeatArea4_actor_percent" min="0" max="100" value="10" disabled>
+    </div>
+  </div>
 </div>
 
 <div class="wrapper">
-  <div class="counter col_third">
+  <div class="counter col_fourth">
     <img width="50" height="60" src="{% static 'app/images/heat_pump.png' %}" />
     <h1
             id="z1_water_temp"
@@ -166,7 +182,7 @@
      </p>
   </div>
 
-  <div class="counter col_third">
+  <div class="counter col_fourth">
     <img width="50" height="60"  src="{% static 'app/images/heat_pump.png' %}" />
     <h1
             id="z2_water_temp"
@@ -179,7 +195,7 @@
     </p>
   </div>
 
-  <div class="counter col_third end">
+  <div class="counter col_fourth">
     <img width="50" height="60" src="{% static 'app/images/icon_tank.png' %}" />
     <h1
             id="tankStatus_temp_now"
@@ -189,6 +205,20 @@
     </h1>
     <p class="count-text">
       Tarbevesi <span class="format_target format_celsius" id="tankStatus_temp_target"></span>
+    </p>
+  </div>
+
+  {#  Inlet/Outlet water temp #}
+  <div class="counter col_fourth end">
+    <img width="50" height="60" src="{% static 'app/images/heat_pump.png' %}" />
+    <h1
+            id="olet_water_temp"
+            class="timer count-title count-number format_celsius"
+    >
+      -
+    </h1>
+    <p class="count-text">
+      Vesi akupaagist <span class="format_target format_celsius" id="ilet_water_temp"></span>
     </p>
   </div>
 </div>

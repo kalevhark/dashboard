@@ -101,6 +101,11 @@ function update_aquarea_serv_data(url, chart) {
       let elZone2Status_temp_target = $('#zone2Status_temp_target');
       elZone2Status_temp_target.text(data.status.z2_water_temp_target);
 
+      let elOlet_water_temp = $('#olet_water_temp');
+      elOlet_water_temp.text(data.status.olet_water_temp.toFixed(1));
+      let elIlet_water_temp = $('#ilet_water_temp');
+      elIlet_water_temp.text(data.status.ilet_water_temp.toFixed(1));
+
       let elTankStatus_temp_now = $('#tankStatus_temp_now');
       elTankStatus_temp_now.text(data.status.tank_temp);
       let elTankStatus_temp_target = $('#tankStatus_temp_target');
@@ -251,6 +256,17 @@ function update_ezr_data(url) {
       let elHeatArea3_heatarea_name = $('#HeatArea3_heatarea_name');
       elHeatArea3_heatarea_name.text(data.nr3.heatarea_name);
       document.getElementById('HeatArea3_actor_percent').value = data.nr3.actor_percent;
+
+      let elHeatArea4_t_actual = $('#HeatArea4_t_actual');
+      elHeatArea4_t_actual.text(data.nr4.t_actual);
+      if (data.nr4.actor == '1') {
+        elHeatArea4_t_actual.addClass('color-red');
+      };
+      let elHeatArea4_t_target = $('#HeatArea4_t_target');
+      elHeatArea4_t_target.text(data.nr4.t_target);
+      let elHeatArea4_heatarea_name = $('#HeatArea4_heatarea_name');
+      elHeatArea4_heatarea_name.text(data.nr4.heatarea_name);
+      document.getElementById('HeatArea4_actor_percent').value = data.nr4.actor_percent;
     },
     error: function (XMLHttpRequest, textstatus, errorThrown) {
 	  console.log(XMLHttpRequest, textstatus, errorThrown);

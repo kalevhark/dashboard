@@ -126,6 +126,7 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
     # Töötleme andmed graafiku jaoks
     elements = [
         34,  # Actual outdoor temperature [°C]
+        35,  # Inlet water temperature [°C]
         36,  # Outlet water temperature [°C]
         37,  # Zone1: Water temperature [°C]
         38,  # Zone2: Water temperature [°C]
@@ -136,6 +137,8 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
     ]
 
     act_outd_temp = []
+    ilet_water_temp = []
+    olet_water_temp = []
     z1_water_temp = []
     z2_water_temp = []
     z1_water_temp_target = []
@@ -151,8 +154,13 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
 
     for row in logiandmed_dict:
         row_date = datetime.fromtimestamp(int(row) / 1000)
+        # kuupäev
         cat_date = round((row_date - dateTime_last_hours_fullhour).seconds / 3600, 2)
+        # välistemperatuur
         act_outd_temp.append([cat_date, float(logiandmed_dict[row][34])])
+        # pumpa sisenev ja väljuv temperatuur
+        ilet_water_temp.append([cat_date, float(logiandmed_dict[row][35])])
+        olet_water_temp.append([cat_date, float(logiandmed_dict[row][36])])
         z1_water_temp.append([cat_date, float(logiandmed_dict[row][37])])
         z2_water_temp.append([cat_date, float(logiandmed_dict[row][38])])
         z1_water_temp_target.append([cat_date, float(logiandmed_dict[row][39])])
@@ -186,6 +194,8 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
         status = {
             'datetime': pytz.timezone('Europe/Tallinn').localize(row_date),
             'act_outd_temp': act_outd_temp[-1][1],
+            'ilet_water_temp': ilet_water_temp[-1][1],
+            'olet_water_temp': olet_water_temp[-1][1],
             'z1_water_temp': z1_water_temp[-1][1],
             'z2_water_temp': z2_water_temp[-1][1],
             'z1_water_temp_target': z1_water_temp_target[-1][1],

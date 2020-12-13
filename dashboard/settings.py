@@ -30,9 +30,8 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = [
-    '192.168.1.143',
-    's9a.lan',
-    'localhost',
+    's9a.lan', '192.168.1.143',
+    'localhost', '127.0.0.1'
 ]
 
 # Application definition
