@@ -167,7 +167,7 @@ function update_aquarea_smrt_data(url, chart) {
         $("#zone2Status_temp_target").hide();
       };
 
-      if (data.status.status[0].tankStatus.operationStatus == "1") {
+      if (data.status.status[0].tankStatus[0].operationStatus == "1") {
         $("#tankStatus_temp_target").show();
         $("#tankStatus_temp_now").addClass('color-red');
       } else {
