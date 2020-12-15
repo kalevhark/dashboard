@@ -4,17 +4,6 @@ function getDirection(angle) {
 }
 
 
-function changeClass(windDirection){
-  // var windDirection = getRandomInt(360).toString().slice(0,-1) + "0";
-  console.log(windDirection);
-  // var windIcon = document.querySelector("WindOrientation");
-  var windIcon = document.getElementById("WindOrientation");
-  windIcon.setAttribute("alt", windDirection);
-  windIcon.setAttribute("title", windDirection);
-  windIcon.className = windIcon.className.replace( /(?:^|\s)(direction-).*[0-9]$/g , '');
-  windIcon.className += " direction-" + windDirection;
-}
-
 function update_xaxis_categories(url, chart) {
   // Küsime x-telje andmed ja täiendame graafikut
   $.ajax({
@@ -51,12 +40,14 @@ function update_ilmateenistus_now_data(url, chart) {
       let elAirtemperature = $('#ilmateenistus_airtemperature')
       elAirtemperature.text(data.airtemperature);
       elAirtemperature.addClass('color-' + data.airtemperature_colorclass);
+
       let elRelativehumidity = $('#ilmateenistus_relativehumidity')
       elRelativehumidity.text(data.relativehumidity);
-      // divClass.classList.remove('color-' + (i - 1));
       elRelativehumidity.addClass('color-' + data.relativehumidity_colorclass);
+
       let elIlmateenistusWindSpeed = $('#ilmateenistus_windspeed');
       elIlmateenistusWindSpeed.text(data.windspeed);
+
       let elIlmateenistusWindSpeedMax = $('#ilmateenistus_windspeedmax');
       elIlmateenistusWindSpeedMax.text(data.windspeedmax);
 
@@ -75,9 +66,6 @@ function update_ilmateenistus_now_data(url, chart) {
       windIcon.setAttribute("title", windDirection);
       windIcon.className = windIcon.className.replace( /(?:^|\s)(direction-).*[0-9]$/g , '');
       windIcon.className += " direction-" + windDirection;
-
-      // changeClass(data.winddirection);
-
     },
     error: function (XMLHttpRequest, textstatus, errorThrown) {
 	  console.log(XMLHttpRequest, textstatus, errorThrown);
