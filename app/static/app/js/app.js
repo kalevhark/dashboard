@@ -65,7 +65,7 @@ function update_ilmateenistus_now_data(url, chart) {
       windIcon.setAttribute("alt", windDirection);
       windIcon.setAttribute("title", windDirection);
       windIcon.className = windIcon.className.replace( /(?:^|\s)(direction-).*[0-9]$/g , '');
-      windIcon.className += " direction-" + windDirection;
+      windIcon.className += " direction-" + windDirection.toString().slice(0,-1) + "0";
     },
     error: function (XMLHttpRequest, textstatus, errorThrown) {
 	  console.log(XMLHttpRequest, textstatus, errorThrown);
