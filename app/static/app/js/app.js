@@ -1,3 +1,20 @@
+function getDirection(angle) {
+  var directions = ['N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE'];
+  return directions[Math.round(((angle %= 360) < 0 ? angle + 360 : angle) / 45) % 8];
+}
+
+
+function changeClass(windDirection){
+  // var windDirection = getRandomInt(360).toString().slice(0,-1) + "0";
+  console.log(windDirection);
+  // var windIcon = document.querySelector("WindOrientation");
+  var windIcon = document.getElementById("WindOrientation");
+  windIcon.setAttribute("alt", windDirection);
+  windIcon.setAttribute("title", windDirection);
+  windIcon.className = windIcon.className.replace( /(?:^|\s)(direction-).*[0-9]$/g , '');
+  windIcon.className += " direction-" + windDirection;
+}
+
 function update_xaxis_categories(url, chart) {
   // Küsime x-telje andmed ja täiendame graafikut
   $.ajax({
@@ -38,6 +55,29 @@ function update_ilmateenistus_now_data(url, chart) {
       elRelativehumidity.text(data.relativehumidity);
       // divClass.classList.remove('color-' + (i - 1));
       elRelativehumidity.addClass('color-' + data.relativehumidity_colorclass);
+      let elIlmateenistusWindSpeed = $('#ilmateenistus_windspeed');
+      elIlmateenistusWindSpeed.text(data.windspeed);
+      let elIlmateenistusWindSpeedMax = $('#ilmateenistus_windspeedmax');
+      elIlmateenistusWindSpeedMax.text(data.windspeedmax);
+
+      let elIlmateenistusPhenomen = $('#ilmateenistusPhenomen');
+      elIlmateenistusPhenomen.className = "";
+      elIlmateenistusPhenomen.className = "weather-icon " + data.phenomenon.toLowerCase();
+
+      if (data.winddirection) {
+        let elIlmateenistusWinddirection = $('#ilmateenistus_winddirection');
+        elIlmateenistusWinddirection.text(getDirection(data.winddirection));
+      };
+
+      let windIcon = document.getElementById("ilmateenistusWindOrientation");
+      let windDirection = data.winddirection;
+      windIcon.setAttribute("alt", windDirection);
+      windIcon.setAttribute("title", windDirection);
+      windIcon.className = windIcon.className.replace( /(?:^|\s)(direction-).*[0-9]$/g , '');
+      windIcon.className += " direction-" + windDirection;
+
+      // changeClass(data.winddirection);
+
     },
     error: function (XMLHttpRequest, textstatus, errorThrown) {
 	  console.log(XMLHttpRequest, textstatus, errorThrown);

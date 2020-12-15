@@ -1,0 +1,172 @@
+/* Selge, Clear */
+.clear {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/selge-paev-f67.png") no-repeat left top;
+}
+.night .clear {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/selge-oo-f80.png") no-repeat left top;
+}
+
+/* VÃ¤hene pilvisus, Few Clouds */
+.few_clouds {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/vahene-pilvisus-paev-f100.png") no-repeat left top;
+}
+.night .few_clouds {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/vahene-pilvisus-oo-f100.png") no-repeat left top;
+}
+
+/* Variable clouds */
+.variable_clouds {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/vahelduv-pilvisus-f100.png") no-repeat left top;
+}
+.night .variable_clouds {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/poolpilves-f100.png") no-repeat left top;
+}
+
+/* Pilves selgimistega, Cloudy with clear spells */
+.cloudy_with_clear_spells {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/pilves-selgimistega-f100.png") no-repeat left top;
+}
+.night .cloudy_with_clear_spells {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/peamiselt-pilves-f100.png") no-repeat left top;
+}
+
+/* Pilves, Cloudy */
+.cloudy, .overcast {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/pilves-f100.png") no-repeat left top;
+}
+
+/* NÃµrk hooglumi, Light snow shower */
+.light_snow_shower {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/nork-hooglumi-paev-f37.png") no-repeat left top;
+}
+.night .light_snow_shower {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/nork-hooglumi-oo-f41.png") no-repeat left top;
+}
+
+/* MÃµÃµdukas hooglumi, Moderate snow shower */
+.moderate_snow_shower {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/moodukas-hooglumi-paev-f37.png") no-repeat left top;
+}
+.night .moderate_snow_shower {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/moodukas-hooglumi-oo-f37.png") no-repeat left top;
+}
+
+/* Tugev hooglumi, Heavy snow shower */
+.heavy_snow_shower {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/tugev-hoolumi-paev-f37.png") no-repeat left top;
+}
+.night .heavy_snow_shower {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/tugev-hoolumi-oo-f37.png") no-repeat left top;
+}
+
+/* NÃµrk hoovihm, Light shower */
+.light_shower {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/nork-hoovihm-paev-f29.png") no-repeat left top;
+}
+.night .light_shower {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/nork-hoovihm-oo-f29.png") no-repeat left top;
+}
+
+/* MÃµÃµdukas hoovihm, Moderate shower */
+.moderate_shower {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/moodukas-hoovihm-paev-f40.png") no-repeat left top;
+}
+.night .moderate_shower {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/moodukas-hoovihm-oo-f41.png") no-repeat left top;
+}
+
+/* Tugev hoovihm, Heavy shower */
+.heavy_shower {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/tugev-hoovihm-paev-f34.png") no-repeat left top;
+}
+.night .heavy_shower {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/tugev-hoovihm-oo-f36.png") no-repeat left top;
+}
+
+/* NÃµrk vihm, Light rain */
+.light_rain {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/nork-vihm-f29.png") no-repeat left top;
+}
+
+/* MÃµÃµdukas Vihm, Moderate rain */
+.moderate_rain {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/moodukas-vihm-f40.png") no-repeat left top;
+}
+
+/* Tugev vihm, Heavy rain */
+.heavy_rain  {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/tugev-vihm-f34.png") no-repeat left top;
+}
+
+
+/* JÃ¤ide, Risk of glaze */
+.risk_of_glaze {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/jaide-f42.png") no-repeat left top;
+}
+
+/* NÃµrk lÃ¶rtsisadu, Light sleet */
+.light_sleet {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/nork-lortsisadu-f28.png") no-repeat left top;
+}
+
+/* MÃµÃµdukas lÃ¶rtsisadu, Moderate sleet */
+.moderate_sleet {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/moodukas-lortsisadu-f37.png") no-repeat left top;
+}
+
+/* NÃµrk lumesadu, Light snowfall */
+.light_snowfall {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/nork-lumesadu-f50.png") no-repeat left top;
+}
+
+/* MÃµÃµdukas lumesadu, Moderate snowfall */
+.moderate_snowfall {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/moodukas-lumesadu-f37.png") no-repeat left top;
+}
+
+/* Tugev lumesadu, Heavy snowfall */
+.heavy_snowfall {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/tugev-lumesadu-f37.png") no-repeat left top;
+}
+
+/* Ãœldtuisk, Snowstorm */
+.snowstorm {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/lumetuisk-f83.png") no-repeat left top;
+}
+
+/* Pinnatuisk, Drifting snow */
+.drifting_snow {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/pinnatuisk-f66.png") no-repeat left top;
+}
+
+/* Rahe, Hail */
+.hail {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/rahe-f39.png") no-repeat left top;
+}
+
+/* Uduvine, Mist */
+.mist {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/uduvine-f41.png") no-repeat left top;
+}
+
+/* Udu, Fog */
+.fog {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/udu-f60.png") no-repeat left top;
+}
+
+/* Ã„ike, Thunder */
+.thunder {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/aike-f24.png") no-repeat left top;
+}
+
+/* Ã„ikesevihm, Thunderstorm */
+.thunderstorm {
+    background:     url("https://www.ilmateenistus.ee/wp-content/themes/emhi2013/images/weather-icons/aikesevihm-f45.png") no-repeat left top;
+}
+
+.weather-icon {
+    display:        inline-block;
+    width:          50px;
+    height:         50px;
+    text-indent:    -40000px;
+}
