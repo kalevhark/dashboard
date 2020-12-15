@@ -51,14 +51,14 @@ function update_ilmateenistus_now_data(url, chart) {
       let elIlmateenistusWindSpeedMax = $('#ilmateenistus_windspeedmax');
       elIlmateenistusWindSpeedMax.text(data.windspeedmax);
 
-      let elIlmateenistusPhenomen = $('#ilmateenistusPhenomen');
-      elIlmateenistusPhenomen.className = "";
-      elIlmateenistusPhenomen.className = "weather-icon " + data.phenomenon.toLowerCase();
+      if ( data.phenomenon !== null ) {
+        let elIlmateenistusPhenomen = $('#ilmateenistusPhenomen');
+        elIlmateenistusPhenomen.className = "";
+        elIlmateenistusPhenomen.className = "weather-icon " + data.phenomenon.toLowerCase();
+      }
 
-      if (data.winddirection) {
-        let elIlmateenistusWinddirection = $('#ilmateenistus_winddirection');
-        elIlmateenistusWinddirection.text(getDirection(data.winddirection));
-      };
+      let elIlmateenistusWinddirection = $('#ilmateenistus_winddirection');
+      elIlmateenistusWinddirection.text(getDirection(data.winddirection));
 
       let windIcon = document.getElementById("ilmateenistusWindOrientation");
       let windDirection = data.winddirection;
@@ -109,6 +109,7 @@ function update_aquarea_serv_data(url, chart) {
     timeout: 300000,
 	beforeSend: function() {
       // $("#loaderDiv3").show();
+      $("#img31").addClass('spinner');
     },
     success: function (data) {
       console.log(data);
@@ -133,6 +134,7 @@ function update_aquarea_serv_data(url, chart) {
       elOlet_water_temp.text(data.status.olet_water_temp.toFixed(1));
       let elIlet_water_temp = $('#ilet_water_temp');
       elIlet_water_temp.text(data.status.ilet_water_temp.toFixed(1));
+      $("#img24").removeClass('spinner');
 
       let elTankStatus_temp_now = $('#tankStatus_temp_now');
       elTankStatus_temp_now.text(data.status.tank_temp);
@@ -145,7 +147,8 @@ function update_aquarea_serv_data(url, chart) {
         elAct_outd_temp.addClass('color-red');
       } else {
         elAct_outd_temp.addClass('color-blue');
-      };
+      }
+      $("#img31").removeClass('spinner');
     },
     error: function (XMLHttpRequest, textstatus, errorThrown) {
 	  console.log(XMLHttpRequest, textstatus, errorThrown);
@@ -164,6 +167,10 @@ function update_aquarea_smrt_data(url, chart) {
     timeout: 300000,
 	beforeSend: function() {
       // $("#loaderDiv3").show();
+      $("#img21").addClass('spinner');
+      $("#img22").addClass('spinner');
+      $("#img23").addClass('spinner');
+      $("#img24").addClass('spinner');
     },
     success: function (data) {
       console.log(data);
@@ -187,6 +194,7 @@ function update_aquarea_smrt_data(url, chart) {
       } else {
         $("#zone1Status_temp_target").hide();
       };
+      $("#img21").removeClass('spinner');
 
       if (data.status.status[0].zoneStatus[1].operationStatus == "1") {
         $("#zone2Status_temp_target").show();
@@ -194,6 +202,7 @@ function update_aquarea_smrt_data(url, chart) {
       } else {
         $("#zone2Status_temp_target").hide();
       };
+      $("#img22").removeClass('spinner');
 
       if (data.status.status[0].tankStatus[0].operationStatus == "1") {
         $("#tankStatus_temp_target").show();
@@ -201,6 +210,7 @@ function update_aquarea_smrt_data(url, chart) {
       } else {
         $("#tankStatus_temp_target").hide();
       };
+      $("#img23").removeClass('spinner');
 
       $('#aquarea_consum_date').text(dateString);
 
@@ -247,57 +257,77 @@ function update_ezr_data(url) {
     url: url,
     dataType: 'json',
     timeout: 300000,
+    retryCount: 1,
+    retryLimit: 5,
 	beforeSend: function() {
       // $("#loaderDiv3").show();
+      $("#img11").addClass('spinner');
+      $("#img12").addClass('spinner');
+      $("#img13").addClass('spinner');
+      $("#img14").addClass('spinner');
     },
     success: function (data) {
       console.log(data);
       let elHeatArea1_t_actual = $('#HeatArea1_t_actual');
       elHeatArea1_t_actual.text(data.nr1.t_actual);
-      if (data.nr1.actor == '1') {
+      if (data.nr1.actor === '1') {
         elHeatArea1_t_actual.addClass('color-red');
-      };
+      }
       let elHeatArea1_t_target = $('#HeatArea1_t_target');
       elHeatArea1_t_target.text(data.nr1.t_target);
       let elHeatArea1_heatarea_name = $('#HeatArea1_heatarea_name')
       elHeatArea1_heatarea_name.text(data.nr1.heatarea_name);
       document.getElementById('HeatArea1_actor_percent').value = data.nr1.actor_percent;
+      $("#img11").removeClass('spinner');
 
       let elHeatArea2_t_actual = $('#HeatArea2_t_actual');
       elHeatArea2_t_actual.text(data.nr2.t_actual);
-      if (data.nr2.actor == '1') {
+      if (data.nr2.actor === '1') {
         elHeatArea2_t_actual.addClass('color-red');
-      };
+      }
       let elHeatArea2_t_target = $('#HeatArea2_t_target');
       elHeatArea2_t_target.text(data.nr2.t_target);
       let elHeatArea2_heatarea_name = $('#HeatArea2_heatarea_name');
       elHeatArea2_heatarea_name.text(data.nr2.heatarea_name);
       document.getElementById('HeatArea2_actor_percent').value = data.nr2.actor_percent;
+      $("#img12").removeClass('spinner');
 
       let elHeatArea3_t_actual = $('#HeatArea3_t_actual');
       elHeatArea3_t_actual.text(data.nr3.t_actual);
-      if (data.nr3.actor == '1') {
+      if (data.nr3.actor === '1') {
         elHeatArea3_t_actual.addClass('color-red');
-      };
+      }
       let elHeatArea3_t_target = $('#HeatArea3_t_target');
       elHeatArea3_t_target.text(data.nr3.t_target);
       let elHeatArea3_heatarea_name = $('#HeatArea3_heatarea_name');
       elHeatArea3_heatarea_name.text(data.nr3.heatarea_name);
       document.getElementById('HeatArea3_actor_percent').value = data.nr3.actor_percent;
+      $("#img13").removeClass('spinner');
 
       let elHeatArea4_t_actual = $('#HeatArea4_t_actual');
       elHeatArea4_t_actual.text(data.nr4.t_actual);
-      if (data.nr4.actor == '1') {
+      if (data.nr4.actor === '1') {
         elHeatArea4_t_actual.addClass('color-red');
-      };
+      }
       let elHeatArea4_t_target = $('#HeatArea4_t_target');
       elHeatArea4_t_target.text(data.nr4.t_target);
       let elHeatArea4_heatarea_name = $('#HeatArea4_heatarea_name');
       elHeatArea4_heatarea_name.text(data.nr4.heatarea_name);
       document.getElementById('HeatArea4_actor_percent').value = data.nr4.actor_percent;
+      $("#img14").removeClass('spinner');
     },
     error: function (XMLHttpRequest, textstatus, errorThrown) {
-	  console.log(XMLHttpRequest, textstatus, errorThrown);
+      this.retryCount++;
+      if (this.retryCount <= this.retryLimit) {
+        //try again
+        var ajaxObject = this;
+        window.setTimeout(function(){
+            $.ajax(ajaxObject);
+        },5000);
+      } else {
+        //user comes here After trying in the if loop for 5 times, with each request having five seconds delay. I am not able to keep delay between each request
+        console.log(XMLHttpRequest, textstatus, errorThrown);
+      }
     },
 	complete: function () {
 	  // $("#loaderDiv3").hide();

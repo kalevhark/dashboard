@@ -263,6 +263,8 @@ def index(request):
             'title': {
                 'text': 'Välistemperatuur (Sulevi 9a)',
             },
+            'tickInterval': 1,
+            'minorTickInterval': 0.5,
             'labels': {
                 'format': '{value}°C',
                 'plotLines': [{  # zero plane
