@@ -13,6 +13,7 @@ import requests
 
 import app.utils.aquarea_service_util as aqserv
 import app.utils.aquarea_smart_util as aqsmrt
+from app.utils.astral_util import get_day_or_night_plotbands
 
 DEBUG = False
 DEGREE_CELSIUS = u'\N{DEGREE CELSIUS}'
@@ -234,6 +235,7 @@ def index(request):
         },
         'xAxis': {
             'categories': categories,
+            'plotBands': get_day_or_night_plotbands(),
             'plotLines': [{
                 'value': 11 + date_today.minute/60,
                 'label': {
