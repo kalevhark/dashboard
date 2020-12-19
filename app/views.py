@@ -220,7 +220,7 @@ def get_ezr_data(request=None):
 # dashboardi avaleht
 def index(request):
     date_today = datetime.now()
-    # date_today = pytz.timezone('Europe/Tallinn').localize(date_today)
+    date_today = pytz.timezone('Europe/Tallinn').localize(date_today)
     categories = get_xaxis_categories()
 
     title = f'<strong>{date_today.strftime("%d.%m.%Y %H:%M")}</strong>'
@@ -235,7 +235,7 @@ def index(request):
         },
         'xAxis': {
             'categories': categories,
-            'plotBands': get_day_or_night_plotbands(),
+            'plotBands': get_day_or_night_plotbands(date_today),
             'plotLines': [{
                 'value': 11 + date_today.minute/60,
                 'label': {
