@@ -31,6 +31,18 @@ def get_sun(date=datetime.now()):
     # ))
     return s
 
+def get_sun_UTC(date=datetime.now()):
+    city = LocationInfo("Valga", "Estonia", "Europe/Tallinn", 57.776944, 26.031111)
+    s = sun(city.observer, date=date)
+    # print((
+    #     f'Dawn:    {s["dawn"]}\n'
+    #     f'Sunrise: {s["sunrise"]}\n'
+    #     f'Noon:    {s["noon"]}\n'
+    #     f'Sunset:  {s["sunset"]}\n'
+    #     f'Dusk:    {s["dusk"]}\n'
+    # ))
+    return s
+
 def get_day_or_night(date=datetime.now(tz=TZ)):
     s = get_sun(date)
     if date > s['dawn'] and date < s['dusk']:
@@ -89,6 +101,45 @@ def get_day_or_night_plotbands(date=datetime.now(tz=TZ)):
             )
     return day_or_night_plotbands
 
+def get_sun_for_year(year=2021, tz='', delta=0):
+    start_hour = 7
+    stop_hour = 19
+    day_time_total = 0
+    night_time_total = 0
+    day_time_in_primetime_total = 0
+    algus = datetime(year, 3, 1)
+    while algus.year <= year:
+        if tz == 'UTC':
+            s = get_sun_UTC(algus)
+        else:
+            s = get_sun(algus)
+        # print(algus, end=': ')
+        for state in s.keys():
+            if delta != 0:
+                s[state] += timedelta(hours=delta)
+
+            # print(s[state], end=' ')
+        sunrise_hours = s['sunrise'].hour + s['sunrise'].minute/60 + s['sunrise'].second/3600
+        sunset_hours =  s['sunset'].hour + s['sunset'].minute/60 + s['sunset'].second/3600
+        day_time = sunset_hours - sunrise_hours
+        day_time_in_primetime = (
+            day_time -
+            ((sunrise_hours-start_hour) if sunrise_hours > start_hour else 0) -
+            ((stop_hour-sunset_hours) if stop_hour > sunset_hours else 0)
+        )
+        # print(day_time)
+        day_time_total += day_time
+        day_time_in_primetime_total += day_time_in_primetime
+        night_time_total += (24-day_time)
+        algus += timedelta(days=1)
+    print(
+        tz,
+        delta,
+        round(day_time_total, 0),
+        round(night_time_total, 0),
+        round(day_time_in_primetime_total, 0)
+    )
+
 def get_moon(date=datetime.now()):
     m = moon.phase(date)
     """
@@ -107,6 +158,9 @@ def main():
     # ranges = get_day_or_night_ranges()
     print(get_day_or_night())
     print(get_day_or_night_plotbands())
+    get_sun_for_year(year=2021, tz='UTC', delta=2)
+    get_sun_for_year(year=2021, tz='UTC', delta=3)
+    get_sun_for_year(year=2021)
 
 if __name__ == "__main__":
     main()
