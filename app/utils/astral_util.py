@@ -102,8 +102,8 @@ def get_day_or_night_plotbands(date=datetime.now(tz=TZ)):
     return day_or_night_plotbands
 
 def get_sun_for_year(year=2021, tz='', delta=0):
-    start_hour = 7
-    stop_hour = 19
+    start_hour = 9
+    stop_hour = 18
     day_time_total = 0
     night_time_total = 0
     day_time_in_primetime_total = 0

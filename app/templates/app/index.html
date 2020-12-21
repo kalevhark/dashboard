@@ -20,7 +20,7 @@
   <script src="https://code.highcharts.com/modules/annotations.js"></script>
 </head>
 <body>
-<div class="wrapper">
+<div class="chart_wrapper">
   <figure class="highcharts-figure">
     <div id="container"></div>
   </figure>
@@ -95,6 +95,19 @@
 <!--Aquarea andmed-->
 <div class="wrapper">
   <div class="counter col_fourth">
+    <img id="img23" width="50" height="50" src="{% static 'app/images/icon_tank.png' %}" />
+    <h1
+            id="tankStatus_temp_now"
+            class="timer count-title count-number format_celsius"
+    >
+      -
+    </h1>
+    <p class="count-text">
+      Tarbevesi <span class="format_target format_celsius" id="tankStatus_temp_target"></span>
+    </p>
+  </div>
+
+  <div class="counter col_fourth">
     <img id="img24" width="50" height="50" src="{% static 'app/images/heat_pump.png' %}" />
     <h1
             id="olet_water_temp"
@@ -120,7 +133,7 @@
      </p>
   </div>
 
-  <div class="counter col_fourth">
+  <div class="counter col_fourth end">
     <img id="img22" width="50" height="50"  src="{% static 'app/images/heat_pump.png' %}" />
     <h1
             id="z2_water_temp"
@@ -130,19 +143,6 @@
     </h1>
     <p class="count-text ">
       Põrandaküte <span class="format_target format_celsius" id="zone2Status_temp_target"></span>
-    </p>
-  </div>
-
-  <div class="counter col_fourth end">
-    <img id="img23" width="50" height="50" src="{% static 'app/images/icon_tank.png' %}" />
-    <h1
-            id="tankStatus_temp_now"
-            class="timer count-title count-number format_celsius"
-    >
-      -
-    </h1>
-    <p class="count-text">
-      Tarbevesi <span class="format_target format_celsius" id="tankStatus_temp_target"></span>
     </p>
   </div>
 </div>
