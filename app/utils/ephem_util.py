@@ -53,8 +53,9 @@ def get_sun_str(observer=get_observer()):
                      f"{D_ARR}{to_local(observer.next_setting(s)):%H:%M:%S}"
     else:
         sun_string = f"{U_ARR}{to_local(observer.next_rising(s)):%H:%M:%S}"
-    print(SUN, sun_string)
-    return s
+    # print(SUN, sun_string)
+    sun_string = f'{SUN} {sun_string}'
+    return sun_string
 
 def get_moon_str(observer=get_observer()):
     m = ephem.Moon()
@@ -77,8 +78,8 @@ def get_moon_str(observer=get_observer()):
             f"{D_ARR}{to_local(observer.next_setting(m)):%H:%M:%S}"
     else:
         moon_string = f"{U_ARR}{to_local(observer.next_rising(m)):%H:%M:%S}"
-    print(MOON, moon_string)
-    return m
+    moon_string = f'{MOON} {moon_string}'
+    return moon_string
 
 def main():
     d = datetime(2021,1,2,8,8,33)

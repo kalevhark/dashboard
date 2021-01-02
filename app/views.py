@@ -227,7 +227,7 @@ def index(request):
     sun_str = ephem_data.get_sun_str()
     moon_str = ephem_data.get_moon_str()
     title = f'<strong>{date_today.strftime("%d.%m.%Y %H:%M")} {sun_str} {moon_str}</strong>'
-
+    print(title)
     chart_24h = {
         'chart': {
             'type': 'column'
