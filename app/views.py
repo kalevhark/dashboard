@@ -224,8 +224,8 @@ def index(request):
     date_today = pytz.timezone('Europe/Tallinn').localize(date_today)
     categories = get_xaxis_categories()
 
-    sun_str = ephem_data.get_sun_str()
-    moon_str = ephem_data.get_moon_str()
+    sun_str = ephem_data.get_sun_str(date_today)
+    moon_str = ephem_data.get_moon_str(date_today)
     title = f'<strong>{date_today.strftime("%d.%m.%Y %H:%M")} {sun_str} {moon_str}</strong>'
     print(title)
     chart_24h = {

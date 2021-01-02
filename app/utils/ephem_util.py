@@ -32,10 +32,12 @@ def get_observer(date_loc=datetime.now(tz=tz_EE)):
     observer.lon = LON
     observer.lat = LAT
     observer.elevation = ELEV
-    observer.date =  date_utc
+    observer.date = date_utc
     return observer
 
-def get_sun_str(observer=get_observer()):
+def get_sun_str(date_loc, observer=None):
+    if not observer:
+        observer = get_observer(date_loc)
     s = ephem.Sun()
     s.compute(observer)
     az, alt = s.az, s.alt
@@ -57,7 +59,9 @@ def get_sun_str(observer=get_observer()):
     sun_string = f'{SUN} {sun_string}'
     return sun_string
 
-def get_moon_str(observer=get_observer()):
+def get_moon_str(date_loc, observer=None):
+    if not observer:
+        observer = get_observer(date_loc)
     m = ephem.Moon()
     m.compute(observer)
     az, alt = m.az, m.alt
@@ -82,7 +86,7 @@ def get_moon_str(observer=get_observer()):
     return moon_string
 
 def main():
-    d = datetime(2021,1,2,8,8,33)
+    # d = datetime(2021,1,2,8,8,33)
     # s9a = get_observer()
     sun = get_sun_str()
     moon = get_moon_str()
