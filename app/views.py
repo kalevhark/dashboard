@@ -14,6 +14,7 @@ import requests
 import app.utils.aquarea_service_util as aqserv
 import app.utils.aquarea_smart_util as aqsmrt
 from app.utils.astral_util import get_day_or_night_plotbands
+import app.utils.ephem_util as ephem_data
 
 DEBUG = False
 DEGREE_CELSIUS = u'\N{DEGREE CELSIUS}'
@@ -223,7 +224,9 @@ def index(request):
     date_today = pytz.timezone('Europe/Tallinn').localize(date_today)
     categories = get_xaxis_categories()
 
-    title = f'<strong>{date_today.strftime("%d.%m.%Y %H:%M")}</strong>'
+    sun_str = ephem_data.get_sun_str()
+    moon_str = ephem_data.get_moon_str()
+    title = f'<strong>{date_today.strftime("%d.%m.%Y %H:%M")} {sun_str} {moon_str}</strong>'
 
     chart_24h = {
         'chart': {
