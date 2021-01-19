@@ -4,13 +4,19 @@ import json
 import re
 import requests
 import urllib3
-
-from django.conf import settings
-from bs4 import BeautifulSoup
-import pytz
-
 # Vaigistame ssl veateated
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+try:
+    from django.conf import settings
+    AQUAREA_USR = settings.AQUAREA_USR
+    AQUAREA_PWD_SERVICE = settings.AQUAREA_PWD_SERVICE
+except:
+    import dev_conf
+    AQUAREA_USR = dev_conf.AQUAREA_USR
+    AQUAREA_PWD_SERVICE = dev_conf.AQUAREA_PWD_SERVICE
+
+import pytz
 
 #
 # Aquarea Service andmete lugemine failist
@@ -49,31 +55,43 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
     deviceId = '008007B197792584001434545313831373030634345373130434345373138313931304300000000'
 
     params = {
-        'var.loginId': settings.AQUAREA_USR,
-        'var.password': settings.AQUAREA_PWD_SERVICE,
+        'var.loginId': AQUAREA_USR,
+        'var.password': AQUAREA_PWD_SERVICE,
         'var.inputOmit': 'false'
     }
-
+    headers = {
+        "Sec-Fetch-Mode": "cors",
+        "Origin": "https://aquarea-smart.panasonic.com",
+        "User-Agent": "Mozilla/5.0 (iPad; CPU OS 11_0 like Mac OS X) AppleWebKit/604.1.34 (KHTML, like Gecko) Version/11.0 Mobile/15A5341f Safari/604.1",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "Accept": "*/*",
+        "Registration-ID": "",
+        "Referer": "https://aquarea-smart.panasonic.com/"
+    }
     with requests.Session() as session:
         if verbose:
             print('Küsime võtmed...', end=' ')
         post = session.post(
             LOGIN_URL,
             params=params,
+            headers=headers,
             verify=False
         )
 
         AWSALB = post.cookies['AWSALB']
+        AWSALBCORS = post.cookies['AWSALBCORS']
         JSESSIONID = post.cookies['JSESSIONID']
-        headers = {
-            "Cookie": f"AWSALB={AWSALB}; JSESSIONID={JSESSIONID}"
-        }
+        headers["Cookie"] = f"AWSALB={AWSALB}; AWSALBCORS={AWSALBCORS}; JSESSIONID={JSESSIONID}"
 
-        r = session.get(REQUEST_URL)
+        r = session.get(
+            REQUEST_URL,
+            headers=headers,
+        )
+        print(r.status_code)
         m = re.search("shiesuahruefutohkun = '(\S+)'", r.text)
         shiesuahruefutohkun = m.group(0).split(' = ')[1].replace("'", "")
-        if verbose:
-            print(shiesuahruefutohkun)
+        #if verbose:
+        #    print(shiesuahruefutohkun)
 
         # Valime kasutaja
         payload = {
@@ -107,7 +125,7 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
             '?'.join([LOGINFO_URL, PARAMS]),
             headers=headers
         )
-        # logiandmed_raw = session.post(LOGINFO_URL, params=params, headers=headers)
+        print(logiandmed_raw.status_code)
         logiandmed_json = logiandmed_raw.json()
 
         logiandmed_dict = json.loads(logiandmed_json['logData'])

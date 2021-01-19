@@ -2,12 +2,23 @@ from datetime import datetime, timedelta
 import json
 import re
 
+import urllib3
+# Vaigistame ssl veateated
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 from bs4 import BeautifulSoup
-from django.conf import settings
-from django.http import JsonResponse
 import requests
 
-from app.models import Log
+try:
+    from django.conf import settings
+    from django.http import JsonResponse
+    from app.models import Log
+    AQUAREA_USR = settings.AQUAREA_USR
+    AQUAREA_PWD = settings.AQUAREA_PWD
+except:
+    import dev_conf
+    AQUAREA_USR = dev_conf.AQUAREA_USR
+    AQUAREA_PWD = dev_conf.AQUAREA_PWD
 
 DEBUG = False
 DEGREE_CELSIUS = u'\N{DEGREE CELSIUS}'
@@ -28,8 +39,8 @@ request_kwargs = {
     },
     "params": {
         "var.inputOmit": "false",
-        "var.loginId": settings.AQUAREA_USR,
-        "var.password": settings.AQUAREA_PWD
+        "var.loginId": AQUAREA_USR,
+        "var.password": AQUAREA_PWD
     }
 }
 
@@ -85,9 +96,10 @@ def login():
         # print('accessToken:', accessToken)
         login_resp = session.post(
             'https://aquarea-smart.panasonic.com/remote/contract',
+            headers=headers,
             verify=False
         )
-    return session
+    return session, login_resp
 
 #
 # Logib Aquarea APIst välja
@@ -134,9 +146,11 @@ def consum(
             period = 'month'
         else:
             period = 'year'
+        headers = request_kwargs['headers']
 
         resp = session.get(
             f'https://aquarea-smart.panasonic.com/remote/v1/api/consumption/{deviceGuid}?{period}={date_string}&_={timestamp}',
+            headers = headers,
             verify=False
         )
         tarbimisandmed = json.loads(resp.text)
@@ -224,16 +238,18 @@ def get_status(session):
     # Logime sisse
     # session = login()
     timestamp = timestamp_now()
+    headers = request_kwargs['headers']
     # Küsime andmed
     deviceGuid = session.cookies['selectedDeviceId']
     resp = session.get(
         f'https://aquarea-smart.panasonic.com/remote/v1/api/devices/{deviceGuid}?_={timestamp}',
+        headers = headers,
         verify=False
     )
     try:
         status_data = json.loads(resp.text)
     except:
-        # print(findmessage(resp.text))
+        print(resp.text)
         return False
 
     # Logime välja
@@ -318,3 +334,9 @@ def weekly_timer(session=None):
     weekly_timer_data = json.loads(raw_data_string)
 
     return weekly_timer_data['weeklytimer'][0]['timer'] # , safe=False
+
+if __name__ == "__main__":
+    session, login_resp = login()
+    print(login_resp)
+    status = get_status(session)
+    print(status)

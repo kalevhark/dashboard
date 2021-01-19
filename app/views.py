@@ -227,7 +227,6 @@ def index(request):
     sun_str = ephem_data.get_sun_str(date_today)
     moon_str = ephem_data.get_moon_str(date_today)
     title = f'<strong>{date_today.strftime("%d.%m.%Y %H:%M")} {sun_str} {moon_str}</strong>'
-    print(title)
     chart_24h = {
         'chart': {
             'type': 'column'
@@ -418,7 +417,7 @@ def get_aquarea_smrt_data(request):
     kuu_eelmine = kuu_tagasi(t2na)
 
     # Logime sisse
-    session = aqsmrt.login()
+    session, login_resp = aqsmrt.login()
 
     # Hetkenäitajad
     status = aqsmrt.get_status(session)
