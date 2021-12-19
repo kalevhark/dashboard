@@ -281,7 +281,7 @@ function update_aquarea_smrt_data_year(url, chart) {
     },
     success: function (data) {
       console.log(data);
-      if (data.length > 0) {
+      if ($.isEmptyObject(data) === false) {
         $('#jooksva_perioodi_tot').text((data.jooksva_perioodi_heat + data.jooksva_perioodi_tank).toFixed(1));
         $('#jooksva_perioodi_heat').text(data.jooksva_perioodi_heat.toFixed(1));
         $('#jooksva_perioodi_tank').text(data.jooksva_perioodi_tank.toFixed(1));
