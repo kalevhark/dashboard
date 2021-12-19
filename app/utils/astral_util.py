@@ -101,13 +101,14 @@ def get_day_or_night_plotbands(date=datetime.now(tz=TZ)):
             )
     return day_or_night_plotbands
 
-def get_sun_for_year(year=2021, tz='', delta=0):
-    start_hour = 9
-    stop_hour = 18
+def get_sun_for_year(year=2021, tz='', start_hour=7, stop_hour=19, delta=0):
+    # start_hour = 9
+    # stop_hour = 18
+    vahemik = f'{start_hour}-{stop_hour}'
     day_time_total = 0
     night_time_total = 0
     day_time_in_primetime_total = 0
-    algus = datetime(year, 3, 1)
+    algus = datetime(year, 1, 1)
     while algus.year <= year:
         if tz == 'UTC':
             s = get_sun_UTC(algus)
@@ -123,21 +124,24 @@ def get_sun_for_year(year=2021, tz='', delta=0):
         sunset_hours =  s['sunset'].hour + s['sunset'].minute/60 + s['sunset'].second/3600
         day_time = sunset_hours - sunrise_hours
         day_time_in_primetime = (
-            day_time -
-            ((sunrise_hours-start_hour) if sunrise_hours > start_hour else 0) -
-            ((stop_hour-sunset_hours) if stop_hour > sunset_hours else 0)
+            stop_hour - start_hour -
+            ((sunrise_hours - start_hour) if sunrise_hours > start_hour else 0) -
+            ((stop_hour - sunset_hours) if stop_hour > sunset_hours else 0)
         )
         # print(day_time)
         day_time_total += day_time
         day_time_in_primetime_total += day_time_in_primetime
         night_time_total += (24-day_time)
+        if algus.day == 1:
+            pass
+            # print(algus, round(sunrise_hours, 1), round(sunset_hours, 1), round(day_time_in_primetime, 1))
         algus += timedelta(days=1)
     print(
         tz,
         delta,
-        round(day_time_total, 0),
-        round(night_time_total, 0),
-        round(day_time_in_primetime_total, 0)
+        f'D:{int(day_time_total)}h',
+        f'N:{int(night_time_total)}h',
+        f'valge aeg valitud vahemikus {vahemik} {int(day_time_in_primetime_total)}h'
     )
 
 def get_moon(date=datetime.now()):

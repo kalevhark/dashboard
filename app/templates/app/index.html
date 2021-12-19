@@ -263,20 +263,55 @@ $(document).ready(function() {
   const url_get_xaxis_categories = "{% url 'app:get_xaxis_categories' %}";
   update_xaxis_categories(url_get_xaxis_categories, chart_24h);
 
+  const url_get_ezr_data = "{% url 'app:get_ezr_data' %}";
+  update_ezr_data(url_get_ezr_data);
+
   const url_get_ilmateenistus_now = "{% url 'app:get_ilmateenistus_now' %}";
   update_ilmateenistus_now_data(url_get_ilmateenistus_now, chart_24h);
 
   const url_get_yrno_forecast = "{% url 'app:get_yrno_forecast' %}";
   update_yrno_next12h_data(url_get_yrno_forecast, chart_24h);
 
+  const url_get_tuyaapi_data = "{% url 'app:get_tuyaapi_data' %}";
+  update_get_tuyaapi_data(url_get_tuyaapi_data, chart_24h);
+
   const url_get_aquarea_serv_data = "{% url 'app:get_aquarea_serv_data' %}";
   update_aquarea_serv_data(url_get_aquarea_serv_data, chart_24h);
 
-  const url_get_aquarea_smrt_data = "{% url 'app:get_aquarea_smrt_data' %}";
-  update_aquarea_smrt_data(url_get_aquarea_smrt_data, chart_24h);
+  const url_get_aquarea_smrt_data_day = "{% url 'app:get_aquarea_smrt_data_day' %}";
+  update_aquarea_smrt_data_day(url_get_aquarea_smrt_data_day, chart_24h);
 
-  const url_get_ezr_data = "{% url 'app:get_ezr_data' %}";
-  update_ezr_data(url_get_ezr_data);
+  const url_get_aquarea_smrt_data_month = "{% url 'app:get_aquarea_smrt_data_month' %}";
+  // update_aquarea_smrt_data_month(url_get_aquarea_smrt_data_month, chart_24h);
+
+  // vajalik, et ära oodata päevaandmete küsimine
+  function updateMonth () {
+    var el = $('#aquarea_consum_date').text();
+
+    if (el.length) {
+      // Do something with el
+      update_aquarea_smrt_data_month(url_get_aquarea_smrt_data_month, chart_24h);
+    } else {
+      setTimeout(updateMonth, 1000); // try again in 300 milliseconds
+    }
+  }
+  updateMonth();
+
+  const url_get_aquarea_smrt_data_year = "{% url 'app:get_aquarea_smrt_data_year' %}";
+  // update_aquarea_smrt_data_year(url_get_aquarea_smrt_data_year, chart_24h);
+
+  // vajalik, et ära oodata kuuandmete küsimine
+  function updateYear () {
+    var el = $('#kuu_tot').text();
+
+    if (el.length) {
+      // Do something with el
+      update_aquarea_smrt_data_year(url_get_aquarea_smrt_data_year, chart_24h);
+    } else {
+      setTimeout(updateYear, 1000); // try again in 300 milliseconds
+    }
+  }
+  updateYear();
 });
 </script>
 

@@ -51,7 +51,10 @@ def timestamp_now():
 # Kontrollib kas logis on andmed täielikud
 def check_log_dates(tarbimisandmed):
     viivitus = timedelta(seconds = 3600) # Et kindlalt täielikud andmed, siis viide 1 tund
-    date_string = tarbimisandmed['dateData'][0]['startDate']
+    try:
+        date_string = tarbimisandmed['dateData'][0]['startDate']
+    except:
+        print(tarbimisandmed)
     timestamp = tarbimisandmed['timestamp']/1000
     periood = tarbimisandmed['dateData'][0]['timeline']['type']
     perioodi_algus = datetime.strptime(date_string, '%Y-%m-%d')
@@ -81,24 +84,30 @@ def check_log_dates(tarbimisandmed):
 #
 # autendib kasutaja ja tagastab avatud sessiooni
 #
-def login():
+def login(verbose=False):
     url = request_kwargs['login_url']
     headers = request_kwargs['headers']
     params = request_kwargs['params']
     with requests.Session() as session:
+        if verbose:
+            print('Küsime võtme... ', end='')
         auth_resp = session.post(
             url,
             headers=headers,
             params=params,
             verify=False
         )
-        # accessToken = auth_resp.cookies['accessToken']
-        # print('accessToken:', accessToken)
+        if verbose:
+            accessToken = auth_resp.cookies['accessToken']
+            print(auth_resp, 'accessToken:', accessToken)
+            print('Logime sisse... ', end='')
         login_resp = session.post(
             'https://aquarea-smart.panasonic.com/remote/contract',
             headers=headers,
             verify=False
         )
+        if verbose:
+            print(login_resp)
     return session, login_resp
 
 #
@@ -124,16 +133,20 @@ def logout(session):
 #   week=2019-08-26 NB! monday = today - timedelta(days=today.weekday()) / ei kasuta!
 #
 def consum(
-        session,
-        # period='year',
+        session=None,
         date_string=str(datetime.now().year),
         timestamp=timestamp_now(),
-        # verbose=False
+        verbose=False
 ):
-    log_data = Log.objects.filter(data__dateString=date_string)
+    tarbimisandmed = {}
+    try:
+        log_data = Log.objects.filter(data__dateString=date_string)
+    except:
+        log_data = None
     if log_data:
         tarbimisandmed = log_data.first().data
-        print(date_string, 'andmed andmebaasist')
+        if verbose:
+            print(date_string, 'andmed andmebaasist')
     else:
         # Küsime andmed Aquarea APIst
         deviceGuid = session.cookies['selectedDeviceId']
@@ -153,17 +166,27 @@ def consum(
             headers = headers,
             verify=False
         )
-        tarbimisandmed = json.loads(resp.text)
-        tarbimisandmed['timestamp'] = timestamp
-        tarbimisandmed['dateString'] = date_string
-        print(date_string, end='')
-        if check_log_dates(tarbimisandmed):
-            # Salvestame andmed JSON formaadis
-            new_log = Log.objects.create(data=tarbimisandmed)
-            print(' salvestame id:', new_log)
+        if verbose:
+            print(date_string, resp.status_code, end=' ')
+        if resp.status_code == 200:
+            message = 'andmed APIst: '
+            tarbimisandmed = json.loads(resp.text)
+            tarbimisandmed['timestamp'] = timestamp
+            tarbimisandmed['dateString'] = date_string
+            if check_log_dates(tarbimisandmed):
+                try:
+                    # Salvestame andmed JSON formaadis
+                    new_log = Log.objects.create(data=tarbimisandmed)
+                    message += f'salvestame id: {new_log}'
+                except:
+                    message += 'ei salvesta'
+            else:
+                message += 'ei salvesta'
         else:
-            print(' ei salvesta')
-        print(date_string, 'andmed APIst')
+            print(date_string, resp)
+            message = resp.text[:200]
+        if verbose:
+            print(message)
     return tarbimisandmed
 
 # Andmebaasi korrastamine
@@ -336,7 +359,11 @@ def weekly_timer(session=None):
     return weekly_timer_data['weeklytimer'][0]['timer'] # , safe=False
 
 if __name__ == "__main__":
-    session, login_resp = login()
+    session, login_resp = login(verbose=True)
     print(login_resp)
-    status = get_status(session)
-    print(status)
+    # status = get_status(session)
+    # print(status)
+    consum(session, date_string='2021-12-17', verbose=True)
+    consum(session, date_string='2021-12', verbose=True)
+    consum(session, date_string='2021', verbose=True)
+    logout(session)

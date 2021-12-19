@@ -107,7 +107,7 @@ function update_aquarea_serv_data(url, chart) {
     url: url,
     dataType: 'json',
     timeout: 300000,
-	beforeSend: function() {
+	  beforeSend: function() {
       // $("#loaderDiv3").show();
       $("#img31").addClass('spinner');
     },
@@ -153,19 +153,23 @@ function update_aquarea_serv_data(url, chart) {
     error: function (XMLHttpRequest, textstatus, errorThrown) {
 	  console.log(XMLHttpRequest, textstatus, errorThrown);
     },
-	complete: function () {
-	  // $("#loaderDiv3").hide();
-	}
+	  complete: function () {
+	    // $("#loaderDiv3").hide();
+	  }
   });
 };
 
-function update_aquarea_smrt_data(url, chart) {
-  // Küsime aquarea andmed ja täiendame graafikut
+function update_aquarea_smrt_data_day(url, chart) {
+  // Küsime:
+  // - aquarea tänased ja eilsed andmed
+  // - hetketöörežiimi
+  // - nädalagraafikus
+  // Täiendame graafikut
   $.ajax({
     url: url,
     dataType: 'json',
     timeout: 300000,
-	beforeSend: function() {
+	  beforeSend: function() {
       // $("#loaderDiv3").show();
       $("#img21").addClass('spinner');
       $("#img22").addClass('spinner');
@@ -221,6 +225,28 @@ function update_aquarea_smrt_data(url, chart) {
       $('#eile_tot').text((data.eile_heat+data.eile_tank).toFixed(1));
       $('#eile_heat').text(data.eile_heat.toFixed(1));
       $('#eile_tank').text(data.eile_tank.toFixed(1));
+    },
+    error: function (XMLHttpRequest, textstatus, errorThrown) {
+	  console.log(XMLHttpRequest, textstatus, errorThrown);
+    },
+	  complete: function () {
+	    // $("#loaderDiv3").hide();
+	  }
+  });
+};
+
+function update_aquarea_smrt_data_month(url, chart) {
+  // Küsime:
+  // - aquarea selle ja eelmise kuu andmed
+  $.ajax({
+    url: url,
+    dataType: 'json',
+    timeout: 300000,
+	  beforeSend: function() {
+      // $("#loaderDiv3").show();
+    },
+    success: function (data) {
+      console.log(data);
 
       $('#kuu_tot').text((data.kuu_heat+data.kuu_tank).toFixed(1));
       $('#kuu_heat').text(data.kuu_heat.toFixed(1));
@@ -233,14 +259,37 @@ function update_aquarea_smrt_data(url, chart) {
       $('#kuu_aasta_tagasi_tot').text((data.kuu_aasta_tagasi_heat+data.kuu_aasta_tagasi_tank).toFixed(1));
       $('#kuu_aasta_tagasi_heat').text(data.kuu_aasta_tagasi_heat.toFixed(1));
       $('#kuu_aasta_tagasi_tank').text(data.kuu_aasta_tagasi_tank.toFixed(1));
+    },
+    error: function (XMLHttpRequest, textstatus, errorThrown) {
+	    console.log(XMLHttpRequest, textstatus, errorThrown);
+    },
+	  complete: function () {
+	    // $("#loaderDiv3").hide();
+	  }
+  });
+};
 
-      $('#jooksva_perioodi_tot').text((data.jooksva_perioodi_heat+data.jooksva_perioodi_tank).toFixed(1));
-      $('#jooksva_perioodi_heat').text(data.jooksva_perioodi_heat.toFixed(1));
-      $('#jooksva_perioodi_tank').text(data.jooksva_perioodi_tank.toFixed(1));
+function update_aquarea_smrt_data_year(url, chart) {
+  // Küsime:
+  // - aquarea selle ja eelmise perioodi andmed
+  $.ajax({
+    url: url,
+    dataType: 'json',
+    timeout: 300000,
+	beforeSend: function() {
+      // $("#loaderDiv3").show();
+    },
+    success: function (data) {
+      console.log(data);
+      if (data.length > 0) {
+        $('#jooksva_perioodi_tot').text((data.jooksva_perioodi_heat + data.jooksva_perioodi_tank).toFixed(1));
+        $('#jooksva_perioodi_heat').text(data.jooksva_perioodi_heat.toFixed(1));
+        $('#jooksva_perioodi_tank').text(data.jooksva_perioodi_tank.toFixed(1));
 
-      $('#eelmise_perioodi_tot').text((data.eelmise_perioodi_heat+data.eelmise_perioodi_tank).toFixed(1));
-      $('#eelmise_perioodi_heat').text(data.eelmise_perioodi_heat.toFixed(1));
-      $('#eelmise_perioodi_tank').text(data.eelmise_perioodi_tank.toFixed(1));
+        $('#eelmise_perioodi_tot').text((data.eelmise_perioodi_heat + data.eelmise_perioodi_tank).toFixed(1));
+        $('#eelmise_perioodi_heat').text(data.eelmise_perioodi_heat.toFixed(1));
+        $('#eelmise_perioodi_tank').text(data.eelmise_perioodi_tank.toFixed(1));
+      }
     },
     error: function (XMLHttpRequest, textstatus, errorThrown) {
 	  console.log(XMLHttpRequest, textstatus, errorThrown);
@@ -328,6 +377,34 @@ function update_ezr_data(url) {
         //user comes here After trying in the if loop for 5 times, with each request having five seconds delay. I am not able to keep delay between each request
         console.log(XMLHttpRequest, textstatus, errorThrown);
       }
+    },
+	complete: function () {
+	  // $("#loaderDiv3").hide();
+	}
+  });
+};
+
+function update_get_tuyaapi_data(url, chart) {
+  // Küsime:
+  // - aquarea selle ja eelmise perioodi andmed
+  $.ajax({
+    url: url,
+    dataType: 'json',
+    timeout: 300000,
+	beforeSend: function() {
+      // $("#loaderDiv3").show();
+    },
+    success: function (data) {
+      console.log(data);
+      if (data.dps['1']) {
+        console.log('ON');
+      } else {
+        console.log('OFF');
+      }
+      // $('#jooksva_perioodi_tot').text((data.jooksva_perioodi_heat+data.jooksva_perioodi_tank).toFixed(1));
+    },
+    error: function (XMLHttpRequest, textstatus, errorThrown) {
+	  console.log(XMLHttpRequest, textstatus, errorThrown);
     },
 	complete: function () {
 	  // $("#loaderDiv3").hide();

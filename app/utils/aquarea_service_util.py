@@ -87,7 +87,7 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
             REQUEST_URL,
             headers=headers,
         )
-        print(r.status_code)
+        # print(r.status_code)
         m = re.search("shiesuahruefutohkun = '(\S+)'", r.text)
         shiesuahruefutohkun = m.group(0).split(' = ')[1].replace("'", "")
         #if verbose:
@@ -125,7 +125,7 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
             '?'.join([LOGINFO_URL, PARAMS]),
             headers=headers
         )
-        print(logiandmed_raw.status_code)
+        # print(logiandmed_raw.status_code)
         logiandmed_json = logiandmed_raw.json()
 
         logiandmed_dict = json.loads(logiandmed_json['logData'])

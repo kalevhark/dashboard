@@ -1,15 +1,18 @@
+import time
 from calendar import monthrange
 from datetime import datetime, timedelta, timezone
 import json
 
 import xml.etree.ElementTree as ET
 
+from django.conf import settings
 from django.http import JsonResponse
 
 from django.shortcuts import render
 import pytz
 
 import requests
+import tinytuya # https://pypi.org/project/tinytuya/
 
 import app.utils.aquarea_service_util as aqserv
 import app.utils.aquarea_smart_util as aqsmrt
@@ -408,13 +411,17 @@ def index(request):
     }
     return render(request, 'app/index.html', context)
 
-def get_aquarea_smrt_data(request):
+#
+# Tagastab:
+# - tänase ja eilse päeva andmed
+# - 12h graafiku
+# - jooksva seadme staatuse
+# - nädalagraafiku
+#
+def get_aquarea_smrt_data_day(request):
     t2na = datetime.now()
     eile = t2na - timedelta(days=1)
-    jooksev_aasta = t2na.year
-    jooksev_kuu = t2na.month
     jooksev_p2ev = t2na.day
-    kuu_eelmine = kuu_tagasi(t2na)
 
     # Logime sisse
     session, login_resp = aqsmrt.login()
@@ -434,84 +441,6 @@ def get_aquarea_smrt_data(request):
     eile_heat = sum(filter(None, eile_consum['dateData'][0]['dataSets'][0]['data'][0]['values']))
     eile_tank = sum(filter(None, eile_consum['dateData'][0]['dataSets'][0]['data'][2]['values']))
 
-    # Jooksva kuu kulu
-    kuu_string = t2na.strftime('%Y-%m')
-    kuu_consum = aqsmrt.consum(session, kuu_string)
-    kuu_heat = sum(filter(None, kuu_consum['dateData'][0]['dataSets'][0]['data'][0]['values']))
-    kuu_tank = sum(filter(None, kuu_consum['dateData'][0]['dataSets'][0]['data'][2]['values']))
-
-    # Eelmise kuu kulu
-    kuu_eelmine_string = kuu_eelmine.strftime('%Y-%m')
-    kuu_eelmine_consum = aqsmrt.consum(session, kuu_eelmine_string)
-    kuu_eelmine_heat = sum(filter(None, kuu_eelmine_consum['dateData'][0]['dataSets'][0]['data'][0]['values']))
-    kuu_eelmine_tank = sum(filter(None, kuu_eelmine_consum['dateData'][0]['dataSets'][0]['data'][2]['values']))
-
-    # Eelmise aasta sama kuu kulu
-    kuu_aasta_tagasi_string = datetime(jooksev_aasta - 1, jooksev_kuu, 1).strftime('%Y-%m')
-    kuu_aasta_tagasi_consum = aqsmrt.consum(session, kuu_aasta_tagasi_string)
-    kuu_aasta_tagasi_heat = sum(
-        filter(None, kuu_aasta_tagasi_consum['dateData'][0]['dataSets'][0]['data'][0]['values']))
-    kuu_aasta_tagasi_tank = sum(
-        filter(None, kuu_aasta_tagasi_consum['dateData'][0]['dataSets'][0]['data'][2]['values']))
-
-    # Periood = 1.07.(aasta-1)-30.06.(aasta)
-    jooksva_aasta_string = t2na.strftime('%Y')
-    eelmise_aasta_string = datetime(t2na.year - 1, 1, 1).strftime('%Y')
-    jooksva_aasta_consum = aqsmrt.consum(session, jooksva_aasta_string)
-    eelmise_aasta_consum = aqsmrt.consum(session, eelmise_aasta_string)
-    if t2na >= datetime(t2na.year, 7, 1):  # Kui kütteperioodi esimene poolaasta (alates 1. juulist)
-        # Arvutame jooksva perioodi kulu
-        # Jooksva perioodi 1. poolaasta küttevee kulu
-        jooksva_perioodi_heat = sum(
-            filter(None, jooksva_aasta_consum['dateData'][0]['dataSets'][0]['data'][0]['values'][6:]))
-        # Jooksva perioodi 1. tarbevee kulu
-        jooksva_perioodi_tank = sum(
-            filter(None, jooksva_aasta_consum['dateData'][0]['dataSets'][0]['data'][2]['values'][6:]))
-        # Arvutame eelmise perioodi kulu
-        # Eelmise perioodi 1. poolaasta küttevee kulu
-        eelmise_perioodi_heat = sum(
-            filter(None, eelmise_aasta_consum['dateData'][0]['dataSets'][0]['data'][0]['values'][6:jooksev_kuu - 1]))
-        eelmise_perioodi_heat += sum(
-            filter(None, kuu_aasta_tagasi_consum['dateData'][0]['dataSets'][0]['data'][0]['values'][:jooksev_p2ev]))
-        # Eelmise perioodi 1. tarbevee kulu
-        eelmise_perioodi_tank = sum(
-            filter(None, eelmise_aasta_consum['dateData'][0]['dataSets'][0]['data'][2]['values'][6:jooksev_kuu - 1]))
-        eelmise_perioodi_tank += sum(
-            filter(None, kuu_aasta_tagasi_consum['dateData'][0]['dataSets'][0]['data'][2]['values'][:jooksev_p2ev]))
-    else:  # Kui kütteperioodi teine poolaasta (kuni 30. juunini)
-        # Jooksva perioodi 1. poolaasta küttevee kulu
-        jooksva_perioodi_heat = sum(
-            filter(None, jooksva_aasta_consum['dateData'][0]['dataSets'][0]['data'][0]['values'][:7]))
-        # Jooksva perioodi 1. poolaasta tarbevee kulu
-        jooksva_perioodi_tank = sum(
-            filter(None, jooksva_aasta_consum['dateData'][0]['dataSets'][0]['data'][2]['values'][:7]))
-        # Lisame
-        # Jooksva perioodi 2. poolaasta küttevee kulu
-        jooksva_perioodi_heat += sum(
-            filter(None, eelmise_aasta_consum['dateData'][0]['dataSets'][0]['data'][0]['values'][6:]))
-        # Jooksva perioodi 2. poolaasta tarbevee kulu
-        jooksva_perioodi_tank += sum(
-            filter(None, eelmise_aasta_consum['dateData'][0]['dataSets'][0]['data'][2]['values'][6:]))
-        # Arvutame eelmise perioodi kulu
-        yle_eelmise_aasta_string = datetime(t2na.year - 2, 1, 1).strftime('%Y')
-        yle_eelmise_aasta_consum = aqsmrt.consum(session, yle_eelmise_aasta_string)
-        # Eelmise perioodi 1. poolaasta küttevee kulu
-        eelmise_perioodi_heat = sum(
-            filter(None, yle_eelmise_aasta_consum['dateData'][0]['dataSets'][0]['data'][0]['values'][6:]))
-        # Eelmise perioodi 1. poolaasta tarbevee kulu
-        eelmise_perioodi_tank = sum(
-            filter(None, yle_eelmise_aasta_consum['dateData'][0]['dataSets'][0]['data'][2]['values'][6:]))
-        # Eelmise perioodi 2. poolaasta küttevee kulu
-        eelmise_perioodi_heat += sum(
-            filter(None, eelmise_aasta_consum['dateData'][0]['dataSets'][0]['data'][0]['values'][:jooksev_kuu - 1]))
-        eelmise_perioodi_heat += sum(
-            filter(None, kuu_aasta_tagasi_consum['dateData'][0]['dataSets'][0]['data'][0]['values'][:jooksev_p2ev]))
-        # Eelmise perioodi 2. poolaasta tarbevee kulu
-        eelmise_perioodi_tank += sum(
-            filter(None, eelmise_aasta_consum['dateData'][0]['dataSets'][0]['data'][2]['values'][:jooksev_kuu - 1]))
-        eelmise_perioodi_tank += sum(
-            filter(None, kuu_aasta_tagasi_consum['dateData'][0]['dataSets'][0]['data'][2]['values'][:jooksev_p2ev]))
-
     # Nädalagraafik
     weekly_timer = aqsmrt.weekly_timer(session)
 
@@ -522,7 +451,7 @@ def get_aquarea_smrt_data(request):
     # Aquearea näitab hetketunni tarbimist - näiteks kell 00:30 näidatakse viimase poole tunni tarbimist
     # 12 viimast tundi = hetketund ja 11 eelmist
     date_today_range_24h = [t2na + timedelta(hours=n) for n in range(-11, 13)]
-    categories = [f'{hour.hour}' for hour in date_today_range_24h]
+    # categories = [f'{hour.hour}' for hour in date_today_range_24h]
     # Küsime andmed
     date_today_hour = t2na.hour
     last12_range_start, last12_range_end = 24 + date_today_hour - 11, 24 + date_today_hour + 1
@@ -540,41 +469,182 @@ def get_aquarea_smrt_data(request):
     last_12hour_outdoor_temp = (date_yesterday_outdoor_temp + date_today_outdoor_temp)[
                                last12_range_start:last12_range_end]
 
-    # Teeme tühja graafiku järgnevad 12h jaoks
-    # next_12hour_outdoor_temp = 12 * [None]
-    # next_12hour_outdoor_prec_min = 12 * [None]
-    # next_12hour_outdoor_prec_err = 12 * [None]
-
-    # title_date = f'<strong>{t2na.strftime("%d.%m.%Y %H:%M")}</strong>'
-    # aquarea_temp_val = m2rgiga(aquarea_data["outdoor_now_aquarea"])
-    # aquarea_temp_cls = aquarea_data["outdoor_now_aquarea_colorclass"]
-    # title_aquarea_temp = f'<span class="color-{aquarea_temp_cls}">{aquarea_temp_val}°C</span>'
-    # title = ' '.join(
-    #     [
-    #         title_date,
-    #         title_aquarea_temp
-    #     ]
-    # )
-
     aquarea_data = {
         'status': status,
         't2na_heat': t2na_heat,
         't2na_tank': t2na_tank,
         'eile_heat': eile_heat,
         'eile_tank': eile_tank,
-        'kuu_heat': kuu_heat,
-        'kuu_tank': kuu_tank,
-        'kuu_eelmine_heat': kuu_eelmine_heat,
-        'kuu_eelmine_tank': kuu_eelmine_tank,
-        'kuu_aasta_tagasi_heat': kuu_aasta_tagasi_heat,
-        'kuu_aasta_tagasi_tank': kuu_aasta_tagasi_tank,
-        'jooksva_perioodi_heat': jooksva_perioodi_heat,
-        'jooksva_perioodi_tank': jooksva_perioodi_tank,
-        'eelmise_perioodi_heat': eelmise_perioodi_heat,
-        'eelmise_perioodi_tank': eelmise_perioodi_tank,
         'weekly_timer': weekly_timer,
         'last_12hour_consum_heat': last_12hour_consum_heat,
         'last_12hour_consum_tank': last_12hour_consum_tank,
         'last_12hour_outdoor_temp': last_12hour_outdoor_temp
     }
     return JsonResponse(aquarea_data)
+
+#
+# Tagastab:
+# - jooksva kuu, eelmise kuu ja eelmise aasta sama kuu andmed
+#
+def get_aquarea_smrt_data_month(request):
+    t2na = datetime.now()
+    jooksev_aasta = t2na.year
+    jooksev_kuu = t2na.month
+    # jooksev_p2ev = t2na.day
+    kuu_eelmine = kuu_tagasi(t2na)
+
+    kuu_heat = ''
+    kuu_tank = ''
+    kuu_eelmine_heat = ''
+    kuu_eelmine_tank = ''
+    kuu_aasta_tagasi_heat = ''
+    kuu_aasta_tagasi_tank = ''
+
+    # Logime sisse
+    # time.sleep(30)
+    session, login_resp = aqsmrt.login()
+
+    # Jooksva kuu kulu
+    kuu_string = t2na.strftime('%Y-%m')
+    kuu_consum = aqsmrt.consum(session, kuu_string)
+    if kuu_consum:
+        kuu_heat = sum(filter(None, kuu_consum['dateData'][0]['dataSets'][0]['data'][0]['values']))
+        kuu_tank = sum(filter(None, kuu_consum['dateData'][0]['dataSets'][0]['data'][2]['values']))
+
+    # Eelmise kuu kulu
+    kuu_eelmine_string = kuu_eelmine.strftime('%Y-%m')
+    kuu_eelmine_consum = aqsmrt.consum(session, kuu_eelmine_string)
+    if kuu_eelmine_consum:
+        kuu_eelmine_heat = sum(filter(None, kuu_eelmine_consum['dateData'][0]['dataSets'][0]['data'][0]['values']))
+        kuu_eelmine_tank = sum(filter(None, kuu_eelmine_consum['dateData'][0]['dataSets'][0]['data'][2]['values']))
+
+    # Eelmise aasta sama kuu kulu
+    kuu_aasta_tagasi_string = datetime(jooksev_aasta - 1, jooksev_kuu, 1).strftime('%Y-%m')
+    kuu_aasta_tagasi_consum = aqsmrt.consum(session, kuu_aasta_tagasi_string)
+    if kuu_aasta_tagasi_consum:
+        kuu_aasta_tagasi_heat = sum(
+            filter(None, kuu_aasta_tagasi_consum['dateData'][0]['dataSets'][0]['data'][0]['values']))
+        kuu_aasta_tagasi_tank = sum(
+            filter(None, kuu_aasta_tagasi_consum['dateData'][0]['dataSets'][0]['data'][2]['values']))
+
+    # Logime välja
+    _ = aqsmrt.logout(session)
+
+    aquarea_data = {
+        'kuu_heat': kuu_heat,
+        'kuu_tank': kuu_tank,
+        'kuu_eelmine_heat': kuu_eelmine_heat,
+        'kuu_eelmine_tank': kuu_eelmine_tank,
+        'kuu_aasta_tagasi_heat': kuu_aasta_tagasi_heat,
+        'kuu_aasta_tagasi_tank': kuu_aasta_tagasi_tank,
+    }
+    return JsonResponse(aquarea_data)
+
+#
+# Tagastab:
+# - jooksva aasta, jooksva persioodi ja eelmise perioodi andmed
+#
+def get_aquarea_smrt_data_year(request):
+    t2na = datetime.now()
+    jooksev_aasta = t2na.year
+    jooksev_kuu = t2na.month
+    jooksev_p2ev = t2na.day
+
+    jooksva_perioodi_heat = ''
+    jooksva_perioodi_tank = ''
+    eelmise_perioodi_heat = ''
+    eelmise_perioodi_tank = ''
+
+    # Logime sisse
+    # time.sleep(60)
+    session, login_resp = aqsmrt.login()
+
+    # Eelmise aasta sama kuu kulu
+    kuu_aasta_tagasi_string = datetime(jooksev_aasta - 1, jooksev_kuu, 1).strftime('%Y-%m')
+    kuu_aasta_tagasi_consum = aqsmrt.consum(session, kuu_aasta_tagasi_string)
+
+    # Periood = 1.07.(aasta-1)-30.06.(aasta)
+    jooksva_aasta_string = t2na.strftime('%Y')
+    eelmise_aasta_string = datetime(t2na.year - 1, 1, 1).strftime('%Y')
+
+    if t2na >= datetime(t2na.year, 7, 1):  # Kui kütteperioodi esimene poolaasta (alates 1. juulist)
+        jooksva_aasta_consum = aqsmrt.consum(session, jooksva_aasta_string)
+        eelmise_aasta_consum = aqsmrt.consum(session, eelmise_aasta_string)
+        if all([jooksva_aasta_consum, eelmise_aasta_consum]):
+            # Arvutame jooksva perioodi kulu
+            # Jooksva perioodi 1. poolaasta küttevee kulu
+            jooksva_perioodi_heat = sum(
+                filter(None, jooksva_aasta_consum['dateData'][0]['dataSets'][0]['data'][0]['values'][6:]))
+            # Jooksva perioodi 1. tarbevee kulu
+            jooksva_perioodi_tank = sum(
+                filter(None, jooksva_aasta_consum['dateData'][0]['dataSets'][0]['data'][2]['values'][6:]))
+            # Arvutame eelmise perioodi kulu
+            # Eelmise perioodi 1. poolaasta küttevee kulu
+            eelmise_perioodi_heat = sum(
+                filter(None, eelmise_aasta_consum['dateData'][0]['dataSets'][0]['data'][0]['values'][6:jooksev_kuu - 1]))
+            eelmise_perioodi_heat += sum(
+                filter(None, kuu_aasta_tagasi_consum['dateData'][0]['dataSets'][0]['data'][0]['values'][:jooksev_p2ev]))
+            # Eelmise perioodi 1. tarbevee kulu
+            eelmise_perioodi_tank = sum(
+                filter(None, eelmise_aasta_consum['dateData'][0]['dataSets'][0]['data'][2]['values'][6:jooksev_kuu - 1]))
+            eelmise_perioodi_tank += sum(
+                filter(None, kuu_aasta_tagasi_consum['dateData'][0]['dataSets'][0]['data'][2]['values'][:jooksev_p2ev]))
+    else:  # Kui kütteperioodi teine poolaasta (kuni 30. juunini)
+        jooksva_aasta_consum = aqsmrt.consum(session, jooksva_aasta_string)
+        eelmise_aasta_consum = aqsmrt.consum(session, eelmise_aasta_string)
+        yle_eelmise_aasta_string = datetime(t2na.year - 2, 1, 1).strftime('%Y')
+        yle_eelmise_aasta_consum = aqsmrt.consum(session, yle_eelmise_aasta_string)
+        if all([jooksva_aasta_consum, eelmise_aasta_consum, yle_eelmise_aasta_consum]):
+            # Jooksva perioodi 1. poolaasta küttevee kulu
+            jooksva_perioodi_heat = sum(
+                filter(None, jooksva_aasta_consum['dateData'][0]['dataSets'][0]['data'][0]['values'][:7]))
+            # Jooksva perioodi 1. poolaasta tarbevee kulu
+            jooksva_perioodi_tank = sum(
+                filter(None, jooksva_aasta_consum['dateData'][0]['dataSets'][0]['data'][2]['values'][:7]))
+            # Lisame
+            # Jooksva perioodi 2. poolaasta küttevee kulu
+            jooksva_perioodi_heat += sum(
+                filter(None, eelmise_aasta_consum['dateData'][0]['dataSets'][0]['data'][0]['values'][6:]))
+            # Jooksva perioodi 2. poolaasta tarbevee kulu
+            jooksva_perioodi_tank += sum(
+                filter(None, eelmise_aasta_consum['dateData'][0]['dataSets'][0]['data'][2]['values'][6:]))
+            # Arvutame eelmise perioodi kulu
+            # Eelmise perioodi 1. poolaasta küttevee kulu
+            eelmise_perioodi_heat = sum(
+                filter(None, yle_eelmise_aasta_consum['dateData'][0]['dataSets'][0]['data'][0]['values'][6:]))
+            # Eelmise perioodi 1. poolaasta tarbevee kulu
+            eelmise_perioodi_tank = sum(
+                filter(None, yle_eelmise_aasta_consum['dateData'][0]['dataSets'][0]['data'][2]['values'][6:]))
+            # Eelmise perioodi 2. poolaasta küttevee kulu
+            eelmise_perioodi_heat += sum(
+                filter(None, eelmise_aasta_consum['dateData'][0]['dataSets'][0]['data'][0]['values'][:jooksev_kuu - 1]))
+            eelmise_perioodi_heat += sum(
+                filter(None, kuu_aasta_tagasi_consum['dateData'][0]['dataSets'][0]['data'][0]['values'][:jooksev_p2ev]))
+            # Eelmise perioodi 2. poolaasta tarbevee kulu
+            eelmise_perioodi_tank += sum(
+                filter(None, eelmise_aasta_consum['dateData'][0]['dataSets'][0]['data'][2]['values'][:jooksev_kuu - 1]))
+            eelmise_perioodi_tank += sum(
+                filter(None, kuu_aasta_tagasi_consum['dateData'][0]['dataSets'][0]['data'][2]['values'][:jooksev_p2ev]))
+
+    # Logime välja
+    _ = aqsmrt.logout(session)
+
+    if all([jooksva_perioodi_heat, jooksva_perioodi_tank, eelmise_perioodi_heat, eelmise_perioodi_tank]):
+        aquarea_data = {
+            'jooksva_perioodi_heat': jooksva_perioodi_heat,
+            'jooksva_perioodi_tank': jooksva_perioodi_tank,
+            'eelmise_perioodi_heat': eelmise_perioodi_heat,
+            'eelmise_perioodi_tank': eelmise_perioodi_tank,
+        }
+    else:
+        aquarea_data = {}
+    return JsonResponse(aquarea_data)
+
+def get_tuyaapi_data(request):
+    TUYA_DEVICE_ID = settings.TUYA_DEVICE_ID
+    TUYA_IP_ADDRESS = settings.TUYA_IP_ADDRESS
+    TUYA_LOCAL_KEY = settings.TUYA_LOCAL_KEY
+    d = tinytuya.OutletDevice(TUYA_DEVICE_ID, TUYA_IP_ADDRESS, TUYA_LOCAL_KEY)
+    d.set_version(3.3)
+    tuyaapi_data = d.status()
+    return JsonResponse(tuyaapi_data)
