@@ -397,9 +397,11 @@ function update_get_tuyaapi_data(url, chart) {
     success: function (data) {
       console.log(data);
       if (data.dps['1']) {
-        console.log('ON');
+        // console.log('ON');
+        document.getElementById("img23a").style.visibility = "visible";
       } else {
-        console.log('OFF');
+        // console.log('OFF');
+        document.getElementById("img23a").style.visibility = "hidden";
       }
       // $('#jooksva_perioodi_tot').text((data.jooksva_perioodi_heat+data.jooksva_perioodi_tank).toFixed(1));
     },
