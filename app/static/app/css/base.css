@@ -101,3 +101,12 @@ body {
   color:red;
   visibility:hidden;
 }
+
+.text-day, .text-month, .text-year {
+  visibility:hidden;
+}
+
+.spinner-month, .spinner-year {
+  font-size:24px;
+  visibility: hidden;
+}

@@ -216,6 +216,8 @@ function update_aquarea_smrt_data_day(url, chart) {
       };
       $("#img23").removeClass('spinner');
 
+      $('.text-day').css("visibility", "visible");
+
       $('#aquarea_consum_date').text(dateString);
 
       $('#t2na_tot').text((data.t2na_heat+data.t2na_tank).toFixed(1));
@@ -244,30 +246,37 @@ function update_aquarea_smrt_data_month(url, chart) {
     timeout: 300000,
 	  beforeSend: function() {
       // $("#loaderDiv3").show();
+      $('.spinner-month').css( {"visibility": "visible"} );
     },
     success: function (data) {
       console.log(data);
+      if ($.isEmptyObject(data) === false) {
+        $('.text-month').css("visibility", "visible");
 
-      $('#kuu_tot').text((data.kuu_heat+data.kuu_tank).toFixed(1));
-      $('#kuu_heat').text(data.kuu_heat.toFixed(1));
-      $('#kuu_tank').text(data.kuu_tank.toFixed(1));
+        $('#kuu_tot').text((data.kuu_heat + data.kuu_tank).toFixed(1));
+        $('#kuu_heat').text(data.kuu_heat.toFixed(1));
+        $('#kuu_tank').text(data.kuu_tank.toFixed(1));
 
-      $('#kuu_eelmine_tot').text((data.kuu_eelmine_heat+data.kuu_eelmine_tank).toFixed(1));
-      $('#kuu_eelmine_heat').text(data.kuu_eelmine_heat.toFixed(1));
-      $('#kuu_eelmine_tank').text(data.kuu_eelmine_tank.toFixed(1));
+        $('#kuu_eelmine_tot').text((data.kuu_eelmine_heat + data.kuu_eelmine_tank).toFixed(1));
+        $('#kuu_eelmine_heat').text(data.kuu_eelmine_heat.toFixed(1));
+        $('#kuu_eelmine_tank').text(data.kuu_eelmine_tank.toFixed(1));
 
-      $('#kuu_aasta_tagasi_tot').text((data.kuu_aasta_tagasi_heat+data.kuu_aasta_tagasi_tank).toFixed(1));
-      $('#kuu_aasta_tagasi_heat').text(data.kuu_aasta_tagasi_heat.toFixed(1));
-      $('#kuu_aasta_tagasi_tank').text(data.kuu_aasta_tagasi_tank.toFixed(1));
+        $('#kuu_aasta_tagasi_tot').text((data.kuu_aasta_tagasi_heat + data.kuu_aasta_tagasi_tank).toFixed(1));
+        $('#kuu_aasta_tagasi_heat').text(data.kuu_aasta_tagasi_heat.toFixed(1));
+        $('#kuu_aasta_tagasi_tank').text(data.kuu_aasta_tagasi_tank.toFixed(1));
+      } else {
+        $('.text-month').css( {"visibility": "visible", "color": "lightgray"} );
+      }
     },
     error: function (XMLHttpRequest, textstatus, errorThrown) {
 	    console.log(XMLHttpRequest, textstatus, errorThrown);
     },
 	  complete: function () {
 	    // $("#loaderDiv3").hide();
+      $('.spinner-month').css( {"visibility": "collapse"} );
 	  }
   });
-};
+}
 
 function update_aquarea_smrt_data_year(url, chart) {
   // Küsime:
@@ -276,12 +285,15 @@ function update_aquarea_smrt_data_year(url, chart) {
     url: url,
     dataType: 'json',
     timeout: 300000,
-	beforeSend: function() {
+	  beforeSend: function() {
       // $("#loaderDiv3").show();
+      $('.spinner-year').css( {"visibility": "visible"} );
     },
     success: function (data) {
       console.log(data);
       if ($.isEmptyObject(data) === false) {
+        $('.text-year').css( "visibility", "visible" );
+
         $('#jooksva_perioodi_tot').text((data.jooksva_perioodi_heat + data.jooksva_perioodi_tank).toFixed(1));
         $('#jooksva_perioodi_heat').text(data.jooksva_perioodi_heat.toFixed(1));
         $('#jooksva_perioodi_tank').text(data.jooksva_perioodi_tank.toFixed(1));
@@ -289,6 +301,8 @@ function update_aquarea_smrt_data_year(url, chart) {
         $('#eelmise_perioodi_tot').text((data.eelmise_perioodi_heat + data.eelmise_perioodi_tank).toFixed(1));
         $('#eelmise_perioodi_heat').text(data.eelmise_perioodi_heat.toFixed(1));
         $('#eelmise_perioodi_tank').text(data.eelmise_perioodi_tank.toFixed(1));
+      } else {
+        $('.text-year').css( {"visibility": "visible", "color": "lightgray"} );
       }
     },
     error: function (XMLHttpRequest, textstatus, errorThrown) {
@@ -296,9 +310,10 @@ function update_aquarea_smrt_data_year(url, chart) {
     },
 	complete: function () {
 	  // $("#loaderDiv3").hide();
+    $('.spinner-year').css( {"visibility": "collapse"} );
 	}
   });
-};
+}
 
 function update_ezr_data(url) {
   // Küsime ezr andmed ja täiendame graafikut
@@ -382,7 +397,7 @@ function update_ezr_data(url) {
 	  // $("#loaderDiv3").hide();
 	}
   });
-};
+}
 
 function update_get_tuyaapi_data(url, chart) {
   // Küsime:
@@ -412,4 +427,4 @@ function update_get_tuyaapi_data(url, chart) {
 	  // $("#loaderDiv3").hide();
 	}
   });
-};
+}

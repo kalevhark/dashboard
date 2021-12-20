@@ -5,6 +5,7 @@
   <meta HTTP-EQUIV="content-type" CONTENT="text/html; charset=UTF-8" />
   <title>Aquarea Data</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
   <link rel="stylesheet" href="{% static 'app/css/base.css' %}" />
   <link rel="stylesheet" href="{% static 'app/css/wind.css' %}" />
   <link rel="stylesheet" href="{% static 'app/css/phenomen.css' %}" />
@@ -207,43 +208,43 @@
   		</tr>
     </thead>
     <tr>
-      <td>Täna kuni <span id="aquarea_consum_date"></span></td>
+      <td><span class="text-day">Täna kuni</span> <span class="text-day" id="aquarea_consum_date"></span></td>
       <td><span id="t2na_tot"></span></td>
       <td><span id="t2na_heat"></span></td>
       <td><span id="t2na_tank"></span></td>
     </tr>
     <tr>
-      <td>Eile</td>
+      <td><span class="text-day">Eile</span></td>
       <td><span id="eile_tot"></span></td>
       <td><span id="eile_heat"></span></td>
       <td><span id="eile_tank"></span></td>
     </tr>
     <tr>
-      <td>Sel kuul</td>
-      <td><span id="kuu_tot"></span></td>
-      <td><span id="kuu_heat"></span></td>
-      <td><span id="kuu_tank"></span></td>
+      <td><span class="text-month">Sel kuul</span></td>
+      <td><i class="fa fa-spinner fa-spin spinner-month"></i><span id="kuu_tot"></span></td>
+      <td><i class="fa fa-spinner fa-spin spinner-month"></i><span id="kuu_heat"></span></td>
+      <td><i class="fa fa-spinner fa-spin spinner-month"></i><span id="kuu_tank"></span></td>
     </tr>
     <tr>
-      <td>Eelmisel kuul</td>
+      <td><span class="text-month">Eelmisel kuul</span></td>
       <td><span id="kuu_eelmine_tot"></span></td>
       <td><span id="kuu_eelmine_heat"></span></td>
       <td><span id="kuu_eelmine_tank"></span></td>
     </tr>
     <tr>
-      <td>Eelmise aasta samal kuul</td>
+      <td><span class="text-month">Eelmise aasta samal kuul</span></td>
       <td><span id="kuu_aasta_tagasi_tot"></span></td>
       <td><span id="kuu_aasta_tagasi_heat"></span></td>
       <td><span id="kuu_aasta_tagasi_tank"></span></td>
     </tr>
     <tr>
-      <td>Sel perioodil (alates 01.07)</td>
-      <td><span id="jooksva_perioodi_tot"></span></td>
-      <td><span id="jooksva_perioodi_heat"></span></td>
-      <td><span id="jooksva_perioodi_tank"></span></td>
+      <td><span class="text-year">Sel perioodil (alates 01.07)</span></td>
+      <td><i class="fa fa-spinner fa-spin spinner-year"></i><span id="jooksva_perioodi_tot"></span></td>
+      <td><i class="fa fa-spinner fa-spin spinner-year"></i><span id="jooksva_perioodi_heat"></span></td>
+      <td><i class="fa fa-spinner fa-spin spinner-year"></i><span id="jooksva_perioodi_tank"></span></td>
     </tr>
     <tr>
-      <td>Eelmisel perioodil</td>
+      <td><span class="text-year">Eelmisel perioodil</span></td>
       <td><span id="eelmise_perioodi_tot"></span></td>
       <td><span id="eelmise_perioodi_heat"></span></td>
       <td><span id="eelmise_perioodi_tank"></span></td>
