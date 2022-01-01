@@ -530,7 +530,8 @@ def get_aquarea_smrt_data_month(request):
     # Logime välja
     _ = aqsmrt.logout(session)
 
-    if all([kuu_heat, kuu_heat, kuu_eelmine_heat, kuu_eelmine_tank, kuu_aasta_tagasi_heat, kuu_aasta_tagasi_tank]):
+    # if all([kuu_heat, kuu_heat, kuu_eelmine_heat, kuu_eelmine_tank, kuu_aasta_tagasi_heat, kuu_aasta_tagasi_tank]):
+    if True:
         aquarea_data = {
             'kuu_heat': kuu_heat,
             'kuu_tank': kuu_tank,
