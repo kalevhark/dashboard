@@ -501,7 +501,6 @@ def get_aquarea_smrt_data_month(request):
     kuu_aasta_tagasi_tank = ''
 
     # Logime sisse
-    # time.sleep(30)
     session, login_resp = aqsmrt.login()
 
     # Jooksva kuu kulu
