@@ -77,6 +77,8 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
             headers=headers,
             verify=False
         )
+        print(post.status_code)
+        print(post.text[:4000])
 
         AWSALB = post.cookies['AWSALB']
         AWSALBCORS = post.cookies['AWSALBCORS']
@@ -88,6 +90,7 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
             headers=headers,
         )
         # print(r.status_code)
+        # print(r.text[:2000])
         m = re.search("shiesuahruefutohkun = '(\S+)'", r.text)
         shiesuahruefutohkun = m.group(0).split(' = ')[1].replace("'", "")
         #if verbose:

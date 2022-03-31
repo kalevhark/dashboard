@@ -192,7 +192,7 @@ function update_aquarea_smrt_data_day(url, chart) {
       dateString = `${ho % 24}:${mi}`;
 
       // console.log(data.status.status[0].zoneStatus[0].operationStatus);
-      if (data.status.status[0].zoneStatus[0].operationStatus == 1) {
+      if (data.status.status[0].zoneStatus[0].operationStatus === 1) {
         $("#zone1Status_temp_target").show();
         $("#z1_water_temp").addClass('color-red');
       } else {
@@ -200,7 +200,7 @@ function update_aquarea_smrt_data_day(url, chart) {
       };
       $("#img21").removeClass('spinner');
 
-      if (data.status.status[0].zoneStatus[1].operationStatus == "1") {
+      if (data.status.status[0].zoneStatus[1].operationStatus === 1) {
         $("#zone2Status_temp_target").show();
         $("#z2_water_temp").addClass('color-red');
       } else {
@@ -208,7 +208,7 @@ function update_aquarea_smrt_data_day(url, chart) {
       };
       $("#img22").removeClass('spinner');
 
-      if (data.status.status[0].tankStatus[0].operationStatus == "1") {
+      if (data.status.status[0].tankStatus[0].operationStatus === 1) {
         $("#tankStatus_temp_target").show();
         $("#tankStatus_temp_now").addClass('color-red');
       } else {

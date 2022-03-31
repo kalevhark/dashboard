@@ -458,11 +458,11 @@ def get_aquarea_smrt_data_day(request):
     # Täna
     date_today_consum_heat = t2na_consum['dateData'][0]['dataSets'][0]['data'][0]['values']
     date_today_consum_tank = t2na_consum['dateData'][0]['dataSets'][0]['data'][2]['values']
-    date_today_outdoor_temp = t2na_consum['dateData'][0]['dataSets'][2]['data'][1]['values']
+    date_today_outdoor_temp = t2na_consum['dateData'][0]['dataSets'][3]['data'][1]['values']
     # Eile
     date_yesterday_consum_heat = eile_consum['dateData'][0]['dataSets'][0]['data'][0]['values']
     date_yesterday_consum_tank = eile_consum['dateData'][0]['dataSets'][0]['data'][2]['values']
-    date_yesterday_outdoor_temp = eile_consum['dateData'][0]['dataSets'][2]['data'][1]['values']
+    date_yesterday_outdoor_temp = eile_consum['dateData'][0]['dataSets'][3]['data'][1]['values']
     # Eelnevad 12h
     last_12hour_consum_heat = (date_yesterday_consum_heat + date_today_consum_heat)[last12_range_start:last12_range_end]
     last_12hour_consum_tank = (date_yesterday_consum_tank + date_today_consum_tank)[last12_range_start:last12_range_end]
