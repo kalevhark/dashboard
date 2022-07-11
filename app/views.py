@@ -631,16 +631,21 @@ def get_aquarea_smrt_data_year(request):
 
     # Logime välja
     _ = aqsmrt.logout(session)
-
-    if all([jooksva_perioodi_heat, jooksva_perioodi_tank, eelmise_perioodi_heat, eelmise_perioodi_tank]):
-        aquarea_data = {
-            'jooksva_perioodi_heat': jooksva_perioodi_heat,
-            'jooksva_perioodi_tank': jooksva_perioodi_tank,
-            'eelmise_perioodi_heat': eelmise_perioodi_heat,
-            'eelmise_perioodi_tank': eelmise_perioodi_tank,
-        }
-    else:
-        aquarea_data = {}
+    # if all([jooksva_perioodi_heat, jooksva_perioodi_tank, eelmise_perioodi_heat, eelmise_perioodi_tank]):
+    #     aquarea_data = {
+    #         'jooksva_perioodi_heat': jooksva_perioodi_heat,
+    #         'jooksva_perioodi_tank': jooksva_perioodi_tank,
+    #         'eelmise_perioodi_heat': eelmise_perioodi_heat,
+    #         'eelmise_perioodi_tank': eelmise_perioodi_tank,
+    #     }
+    # else:
+    #     aquarea_data = {}
+    aquarea_data = {
+        'jooksva_perioodi_heat': jooksva_perioodi_heat,
+        'jooksva_perioodi_tank': jooksva_perioodi_tank,
+        'eelmise_perioodi_heat': eelmise_perioodi_heat,
+        'eelmise_perioodi_tank': eelmise_perioodi_tank,
+    }
     return JsonResponse(aquarea_data)
 
 def get_tuyaapi_data(request):
