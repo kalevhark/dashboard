@@ -12,7 +12,7 @@ from django.shortcuts import render
 import pytz
 
 import requests
-import tinytuya # https://pypi.org/project/tinytuya/
+# import tinytuya # https://pypi.org/project/tinytuya/
 
 import app.utils.aquarea_service_util as aqserv
 import app.utils.aquarea_smart_util as aqsmrt
@@ -647,11 +647,11 @@ def get_aquarea_smrt_data_year(request):
     }
     return JsonResponse(aquarea_data)
 
-def get_tuyaapi_data(request):
-    TUYA_DEVICE_ID = settings.TUYA_DEVICE_ID
-    TUYA_IP_ADDRESS = settings.TUYA_IP_ADDRESS
-    TUYA_LOCAL_KEY = settings.TUYA_LOCAL_KEY
-    d = tinytuya.OutletDevice(TUYA_DEVICE_ID, TUYA_IP_ADDRESS, TUYA_LOCAL_KEY)
-    d.set_version(3.3)
-    tuyaapi_data = d.status()
-    return JsonResponse(tuyaapi_data)
+# def get_tuyaapi_data(request):
+#     TUYA_DEVICE_ID = settings.TUYA_DEVICE_ID
+#     TUYA_IP_ADDRESS = settings.TUYA_IP_ADDRESS
+#     TUYA_LOCAL_KEY = settings.TUYA_LOCAL_KEY
+#     d = tinytuya.OutletDevice(TUYA_DEVICE_ID, TUYA_IP_ADDRESS, TUYA_LOCAL_KEY)
+#     d.set_version(3.3)
+#     tuyaapi_data = d.status()
+#     return JsonResponse(tuyaapi_data)
