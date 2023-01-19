@@ -30,40 +30,49 @@ except: # kui käivitatakse lokaalselt
     import views
     from utils import aquarea_smart_util
 
-def get_special_status_predict(delta, outdoorNow, yrno_forecast):
-    special_status_status = [
-        {'specialMode': 1, 'operationStatus': 0},
-        {'specialMode': 2, 'operationStatus': 0}
-    ]
+def get_special_status_predict(outdoorNow, next_hour_airtemperature):
+    # Arvutame järgmise tunni aja prognoositava muutuse
+    delta = round(next_hour_airtemperature - outdoorNow, 1)
+    special_mode = 0
+    # special_status_status = [
+    #     {'specialMode': 1, 'operationStatus': 0},
+    #     {'specialMode': 2, 'operationStatus': 0}
+    # ]
     zone1delta = 0
     zone2delta = 0
-    if delta > 2 and yrno_forecast > 5:
-        special_status_status = [
-            {'specialMode': 1, 'operationStatus': 1},
-            {'specialMode': 2, 'operationStatus': 0}
-        ] # eco
-        zone1delta = 2
-        zone2delta = 1
-        if delta > 4:
-            zone1delta = 4
-            zone2delta = 2
-        if delta > 8:
-            zone1delta = 6
-            zone2delta = 3
-    if delta < -2 and outdoorNow > 5:
-        special_status_status = [
-            {'specialMode': 1, 'operationStatus': 0},
-            {'specialMode': 2, 'operationStatus': 1}
-        ]  # comfort
+    if delta > 2 and next_hour_airtemperature > 5: # oodata on temp t6usu -> eco
+        special_mode = 1
+        # special_status_status = [
+        #     {'specialMode': 1, 'operationStatus': 1},
+        #     {'specialMode': 2, 'operationStatus': 0}
+        # ] # eco
         zone1delta = -2
         zone2delta = -1
-        if delta < -4:
+        if delta > 4:
             zone1delta = -4
             zone2delta = -2
-        if delta < -8:
+        if delta > 8:
             zone1delta = -6
             zone2delta = -3
-    return special_status_status, zone1delta, zone2delta
+    if delta < -2 and outdoorNow > 5: # oodata on temp langust -> comfort
+        special_mode = 2
+        # special_status_status = [
+        #     {'specialMode': 1, 'operationStatus': 0},
+        #     {'specialMode': 2, 'operationStatus': 1}
+        # ]  # comfort
+        zone1delta = 2
+        zone2delta = 1
+        if delta < -4:
+            zone1delta = 4
+            zone2delta = 2
+        if delta < -8:
+            zone1delta = 6
+            zone2delta = 3
+    special_status_status = [
+        {'specialMode': 1, 'operationStatus': 1 if special_mode == 1 else 0},
+        {'specialMode': 2, 'operationStatus': 1 if special_mode == 2 else 0}
+    ]
+    return special_status_status, special_mode, zone1delta, zone2delta
 
 # Kas Aquearea töörežimi on vaja muuta
 def change_special_status(session, aquarea_status):
@@ -78,13 +87,10 @@ def change_special_status(session, aquarea_status):
         yrno_forecast = views.get_yrno_forecast(hours=6)
         # print(yrno_forecast)
         next_hour_airtemperature = yrno_forecast['next_12hour_outdoor_temp'][0]
-        # Arvutame järgmise tunni aja prognoositava muutuse
-        delta = round(next_hour_airtemperature - outdoorNow, 1)
         # Arvutame strateegia järgmiseks tunniks
-        special_status_status, zone1delta, zone2delta = get_special_status_predict(
-            delta=delta,
+        special_status_status, special_mode, zone1delta, zone2delta = get_special_status_predict(
             outdoorNow=outdoorNow,
-            yrno_forecast=yrno_forecast
+            next_hour_airtemperature=next_hour_airtemperature
         )
         special_status_current = {
             'zoneStatus': aquarea_status['status'][0]['zoneStatus'],
@@ -102,7 +108,7 @@ def change_special_status(session, aquarea_status):
             'outdoorNow', outdoorNow,
             'this_hour_airtemperature', this_hour_airtemperature,
             'next_hour_airtemperature', next_hour_airtemperature,
-            'delta', delta,
+            'special_mode', special_mode,
             'zone1delta', zone1delta,
             'zone2delta', zone2delta,
             'change', change
