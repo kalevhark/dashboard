@@ -12,16 +12,16 @@ if __name__ == "__main__":
     import django
     from django.test.utils import setup_test_environment
 
-    os.environ['DJANGO_SETTINGS_MODULE'] = 'dashboard.settings'
-    django.setup()
-    setup_test_environment()
-    from django.conf import settings
-    UTIL_DIR = Path(__file__).resolve().parent  / 'utils'
+    # os.environ['DJANGO_SETTINGS_MODULE'] = 'dashboard.settings'
+    # django.setup()
+    # setup_test_environment()
+    # from django.conf import settings
+    # UTIL_DIR = Path(__file__).resolve().parent  / 'utils'
     # Build paths inside the project like this: UTIL_DIR / 'subdir'.
     # print('Töökataloog:', UTIL_DIR)
 else:
     from django.conf import settings
-    UTIL_DIR = settings.BASE_DIR / 'app' / 'utils'
+    # UTIL_DIR = settings.BASE_DIR / 'app' / 'utils'
 
 try:
     from app import views
