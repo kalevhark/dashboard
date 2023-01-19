@@ -77,8 +77,9 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
             headers=headers,
             verify=False
         )
-        print(post.status_code)
-        print(post.text[:4000])
+        if verbose:
+            print(post.status_code)
+            print(post.text[:4000])
 
         AWSALB = post.cookies['AWSALB']
         AWSALBCORS = post.cookies['AWSALBCORS']
@@ -133,6 +134,7 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
 
         logiandmed_dict = json.loads(logiandmed_json['logData'])
         if verbose:
+            print('Logiandmed:', logiandmed_dict)
             mxd = int(max(logiandmed_dict.keys())) / 1000
             mnd = int(min(logiandmed_dict.keys())) / 1000
             print(f'Andmed: {datetime.fromtimestamp(mnd)}-{datetime.fromtimestamp(mxd)}, {len(logiandmed_dict)} rida')

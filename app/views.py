@@ -103,7 +103,6 @@ def get_ilmateenistus_now(request=None):
         ilmaandmed['relativehumidity'],
         relativehumidity_colorset
     )
-
     return JsonResponse(ilmaandmed) if request else ilmaandmed
 
 def get_yrno_forecast(request=None, hours=12):
