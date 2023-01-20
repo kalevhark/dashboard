@@ -83,8 +83,13 @@ def change_special_status(session, aquarea_status):
         special_status_predict['specialStatus'] = special_status_status
         # kontrollime kas vaja muuta
         change = (special_status_current != special_status_predict)
-        if change:
-            pass # muudame midagi
+        if False: # change:
+            aquarea_smart_util.set_heat_specialstatus(
+                session=session,
+                special_mode=special_mode,
+                zone1delta=zone1delta,
+                zone2delta=zone2delta
+            )
         special_status_dict = {
             'dt': datetime.datetime.now().strftime('%d.%m.%Y %H:%M'),
             'outdoorNow': outdoorNow,
@@ -104,7 +109,13 @@ def change_tank_status(session, aquarea_status):
         outdoorNow = aquarea_status['status'][0]['outdoorNow']
         tank_status_predict = 0 if outdoorNow < 0 else 1
         tank_status_current = aquarea_status['status'][0]['tankStatus'][0]['operationStatus']
-        change = False if tank_status_current == tank_status_predict else True
+        change = (tank_status_current != tank_status_predict)
+        if change:
+            aquarea_smart_util.set_tank_operationstatus(
+                session=session,
+                operation_status=tank_status_predict,
+                aquarea_status=aquarea_status
+            )
         tank_status_dict = {
             'dt': datetime.datetime.now().strftime('%d.%m.%Y %H:%M'),
             'outdoorNow': outdoorNow,

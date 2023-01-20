@@ -288,7 +288,7 @@ def get_status(session=None):
 # normal:  specialStatus = 0
 # eco:     specialStatus = 1
 # comfort: specialStatus = 2
-def set_heat_specialstatus(session=None, specialstatus=0, zone1delta=5, zone2delta=2, aquarea_status=None):
+def set_heat_specialstatus(session=None, special_mode=0, zone1delta=5, zone2delta=2, aquarea_status=None):
     status_data = None
     if not session:
         # Logime sisse
@@ -371,7 +371,7 @@ def set_heat_specialstatus(session=None, specialstatus=0, zone1delta=5, zone2del
                 }
             ]
         }
-        payload = specialstatuses[specialstatus]
+        payload = specialstatuses[special_mode]
 
         resp = session.post(
             f'https://aquarea-smart.panasonic.com/remote/v1/api/devices/{deviceGuid}',
@@ -389,7 +389,7 @@ def set_heat_specialstatus(session=None, specialstatus=0, zone1delta=5, zone2del
     return status_data
 
 # Lylitav Aquaerea tank mode:
-def set_tank_specialstatus(session=None, operation_status=0, aquarea_status=None):
+def set_tank_operationstatus(session=None, operation_status=0, aquarea_status=None):
     status_data = None
     if not session: # Kui sessiooni pole alustatud, logime sisse
         session, login_resp = login(verbose=False)
@@ -703,7 +703,7 @@ if __name__ == "__main__":
     # print(status)
     # resp = set_heat_specialstatus(session=session, specialstatus=0, zone1delta=0, zone2delta=0)
     # print(resp)
-    resp = set_tank_specialstatus(
+    resp = set_tank_operationstatus(
         session=session,
         operation_status=1,
         aquarea_status=aquarea_status
