@@ -34,40 +34,21 @@ def get_special_status_predict(outdoorNow, next_hour_airtemperature):
     # Arvutame järgmise tunni aja prognoositava muutuse
     delta = round(next_hour_airtemperature - outdoorNow, 1)
     special_mode = 0
-    # special_status_status = [
-    #     {'specialMode': 1, 'operationStatus': 0},
-    #     {'specialMode': 2, 'operationStatus': 0}
-    # ]
-    zone1delta = 0
-    zone2delta = 0
+    zone1delta, zone2delta = 0, 0
     if delta > 2 and next_hour_airtemperature > 5: # oodata on temp t6usu -> eco
         special_mode = 1
-        # special_status_status = [
-        #     {'specialMode': 1, 'operationStatus': 1},
-        #     {'specialMode': 2, 'operationStatus': 0}
-        # ] # eco
-        zone1delta = -2
-        zone2delta = -1
+        zone1delta, zone2delta = -2, -1
         if delta > 4:
-            zone1delta = -4
-            zone2delta = -2
+            zone1delta, zone2delta = -4, -2
         if delta > 8:
-            zone1delta = -6
-            zone2delta = -3
+            zone1delta, zone2delta = -6, -3
     if delta < -2 and outdoorNow > 5: # oodata on temp langust -> comfort
         special_mode = 2
-        # special_status_status = [
-        #     {'specialMode': 1, 'operationStatus': 0},
-        #     {'specialMode': 2, 'operationStatus': 1}
-        # ]  # comfort
-        zone1delta = 2
-        zone2delta = 1
+        zone1delta, zone2delta = 2, 1
         if delta < -4:
-            zone1delta = 4
-            zone2delta = 2
+            zone1delta, zone2delta = 4, 2
         if delta < -8:
-            zone1delta = 6
-            zone2delta = 3
+            zone1delta, zone2delta = 6, 3
     special_status_status = [
         {'specialMode': 1, 'operationStatus': 1 if special_mode == 1 else 0},
         {'specialMode': 2, 'operationStatus': 1 if special_mode == 2 else 0}
