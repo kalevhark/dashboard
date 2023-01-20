@@ -4,7 +4,7 @@
 # Aquarea soojuspumba targaks juhtimiseks
 # Käivitamiseks:
 # /python-env-path-to/python3 /path-to-wiki-app/tasks.py
-
+import datetime
 from pathlib import Path
 
 if __name__ == "__main__":
@@ -57,7 +57,7 @@ def get_special_status_predict(outdoorNow, next_hour_airtemperature):
 
 # Kas Aquearea töörežimi on vaja muuta
 def change_special_status(session, aquarea_status):
-    if aquarea_status and aquarea_status['errorCode'] == 0 and aquarea_status['status'][0]['operationStatus']:
+    if aquarea_status and aquarea_status['errorCode'] == 0 and aquarea_status['status'][0]['operationStatus'] == 1:
         # Aquarea registreeritud välistemperatuur
         outdoorNow = aquarea_status['status'][0]['outdoorNow']
         # Ilmateenistuse registreeritud välistemperatuur
@@ -85,19 +85,41 @@ def change_special_status(session, aquarea_status):
         change = (special_status_current != special_status_predict)
         if change:
             pass # muudame midagi
-        print(
-            'outdoorNow', outdoorNow,
-            'this_hour_airtemperature', this_hour_airtemperature,
-            'next_hour_airtemperature', next_hour_airtemperature,
-            'special_mode', special_mode,
-            'zone1delta', zone1delta,
-            'zone2delta', zone2delta,
-            'change', change
-        )
+        special_status_dict = {
+            'dt': datetime.datetime.now().strftime('%d.%m.%Y %H:%M'),
+            'outdoorNow': outdoorNow,
+            'this_hour_airtemperature': this_hour_airtemperature,
+            'next_hour_airtemperature': next_hour_airtemperature,
+            'special_mode': special_mode,
+            'zone1delta': zone1delta,
+            'zone2delta': zone2delta,
+            'change': change
+        }
+        return special_status_dict
+
+# Kas Aquearea töörežimi on vaja muuta
+def change_tank_status(session, aquarea_status):
+    if aquarea_status and aquarea_status['errorCode'] == 0 and aquarea_status['status'][0]['operationStatus'] == 1:
+        # Aquarea registreeritud välistemperatuur
+        outdoorNow = aquarea_status['status'][0]['outdoorNow']
+        tank_status_predict = 0 if outdoorNow < 0 else 1
+        tank_status_current = aquarea_status['status'][0]['tankStatus'][0]['operationStatus']
+        change = False if tank_status_current == tank_status_predict else True
+        tank_status_dict = {
+            'dt': datetime.datetime.now().strftime('%d.%m.%Y %H:%M'),
+            'outdoorNow': outdoorNow,
+            'tank_status_current': tank_status_current,
+            'tank_status_predict': tank_status_predict,
+            'change': change
+        }
+        return tank_status_dict
 
 if __name__ == '__main__':
     session, _ = aquarea_smart_util.login()
     aquarea_status = aquarea_smart_util.get_status(session)
     # print(aquarea_status)
-    change_special_status(session, aquarea_status)
+    result = change_special_status(session, aquarea_status) # normal, eco, comfort
+    print([f'{key}: {value}' for key, value in result.items()])
+    result = change_tank_status(session, aquarea_status) # on, off
+    print([f'{key}: {value}' for key, value in result.items()])
     _ = aquarea_smart_util.logout(session)

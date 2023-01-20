@@ -9,7 +9,7 @@ body {
 
 /* Colors */
 .color-blue {color: #48AFE8;}
-.color-green {}
+.color-green {color: #008000;}
 .color-red {color: #FF3333;}
 
 .format_celsius::after {

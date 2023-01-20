@@ -22,6 +22,6 @@ urlpatterns = [
     # path('log/<str:date_string>/', views.log, name='log'),
     # path('status/', views.status, name='status'),
     # path('today/', views.today, name='today'),
-    # path('weekly_timer/', views.weekly_timer, name='weekly_timer')
+    # path('get_weekly_timer/', views.get_weekly_timer, name='get_weekly_timer')
 ]
 

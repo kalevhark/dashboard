@@ -288,99 +288,181 @@ def get_status(session=None):
 # normal:  specialStatus = 0
 # eco:     specialStatus = 1
 # comfort: specialStatus = 2
-def set_specialstatus(session=None, specialstatus=0, zone1delta=5, zone2delta=2):
+def set_heat_specialstatus(session=None, specialstatus=0, zone1delta=5, zone2delta=2, aquarea_status=None):
+    status_data = None
     if not session:
         # Logime sisse
         session, login_resp = login(verbose=False)
         do_logout = True
     else:
         do_logout = False
-    timestamp = timestamp_now()
-    # Küsime andmed
-    deviceGuid = session.cookies['selectedDeviceId']
-    accessToken = session.cookies['accessToken']
-    selectedDeviceId = session.cookies['selectedDeviceId']
-    selectedGwid = session.cookies['selectedGwid']
-    cookies = [
-        f'selectedGwid={selectedGwid}',
-        f'selectedDeviceId={selectedDeviceId}',
-        'operationDeviceTop=1',
-        f'accessToken={accessToken}',
-        f'deviceControlDate={timestamp}'
-    ]
-    headers = {
-        'Host': 'aquarea-smart.panasonic.com',
-        'Connection': 'keep-alive',
-        'Cache-Control': 'max-age=0',
-        'Upgrade-Insecure-Requests': '1',
-        'Origin': 'https://aquarea-smart.panasonic.com',
-        'Content-Type': 'application/json;charset=UTF-8',
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Mobile Safari/537.36',
-        'Accept': 'application/json, text/javascript, */*; q=0.01',
-        'Sec-Fetch-Site': 'same-origin',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-User': '?1',
-        'Sec-Fetch-Dest': 'document',
-        'Referer': 'https://aquarea-smart.panasonic.com/remote/a2wControl',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept-Language': 'et-EE,et;q=0.9,en;q=0.8,ja;q=0.7',
-        'Cookie': ';'.join(cookies),
-    }
 
-    specialstatuses = {}
+    if not aquarea_status:
+        aquarea_status = get_status(session)
 
-    specialstatuses[0] = {
-        "status":[
-            {
-                "deviceGuid":deviceGuid,
-                "specialStatus":0,
-                "zoneStatus":[
-                    {"zoneId":1,"heatSet":0,"coolSet":0},
-                    {"zoneId":2,"heatSet":0,"coolSet":0}
-                ]
-            }
+    if aquarea_status and aquarea_status['errorCode'] == 0 and aquarea_status['status'][0]['operationStatus'] == 1:
+        timestamp = timestamp_now()
+        # Küsime andmed
+        deviceGuid = session.cookies['selectedDeviceId']
+        accessToken = session.cookies['accessToken']
+        selectedDeviceId = session.cookies['selectedDeviceId']
+        selectedGwid = session.cookies['selectedGwid']
+        cookies = [
+            f'selectedGwid={selectedGwid}',
+            f'selectedDeviceId={selectedDeviceId}',
+            'operationDeviceTop=1',
+            f'accessToken={accessToken}',
+            f'deviceControlDate={timestamp}'
         ]
-    }
-    specialstatuses[1]  = {
-        "status":[
-            {
-                "deviceGuid":deviceGuid,
-                "specialStatus":1,
-                 "zoneStatus":[
-                     {"zoneId":1,"heatSet":-zone1delta,"coolSet":5},
-                     {"zoneId":2,"heatSet":-zone2delta,"coolSet":5}
-                 ]
-             }
-        ]
-    }
-    specialstatuses[2] = {
-        "status": [
-            {
-                "deviceGuid": deviceGuid,
-                "specialStatus": 2,
-                "zoneStatus": [
-                    {"zoneId": 1, "heatSet": zone1delta, "coolSet": -5},
-                    {"zoneId": 2, "heatSet": zone2delta, "coolSet": -5}
-                ]
-            }
-        ]
-    }
-    # ei kasuta:
-    # payload_set_tankStatus = {"status":[{"deviceGuid":deviceGuid,"tankStatus":[{"heatSet":45}]}]}
+        headers = {
+            'Host': 'aquarea-smart.panasonic.com',
+            'Connection': 'keep-alive',
+            'Cache-Control': 'max-age=0',
+            'Upgrade-Insecure-Requests': '1',
+            'Origin': 'https://aquarea-smart.panasonic.com',
+            'Content-Type': 'application/json;charset=UTF-8',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Mobile Safari/537.36',
+            'Accept': 'application/json, text/javascript, */*; q=0.01',
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-User': '?1',
+            'Sec-Fetch-Dest': 'document',
+            'Referer': 'https://aquarea-smart.panasonic.com/remote/a2wControl',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Language': 'et-EE,et;q=0.9,en;q=0.8,ja;q=0.7',
+            'Cookie': ';'.join(cookies),
+        }
 
-    payload = specialstatuses[specialstatus]
+        specialstatuses = {}
 
-    resp = session.post(
-        f'https://aquarea-smart.panasonic.com/remote/v1/api/devices/{deviceGuid}',
-        headers = headers,
-        data = json.dumps(payload),
-        verify=False
-    )
-    try:
-        status_data = json.loads(resp.text)
-    except:
-        print(resp.text)
-        return False
+        specialstatuses[0] = {
+            "status":[
+                {
+                    "deviceGuid":deviceGuid,
+                    "specialStatus":0,
+                    "zoneStatus":[
+                        {"zoneId":1,"heatSet":0,"coolSet":0},
+                        {"zoneId":2,"heatSet":0,"coolSet":0}
+                    ]
+                }
+            ]
+        }
+        specialstatuses[1]  = {
+            "status":[
+                {
+                    "deviceGuid":deviceGuid,
+                    "specialStatus":1,
+                     "zoneStatus":[
+                         {"zoneId":1,"heatSet":-zone1delta,"coolSet":5},
+                         {"zoneId":2,"heatSet":-zone2delta,"coolSet":5}
+                     ]
+                 }
+            ]
+        }
+        specialstatuses[2] = {
+            "status": [
+                {
+                    "deviceGuid": deviceGuid,
+                    "specialStatus": 2,
+                    "zoneStatus": [
+                        {"zoneId": 1, "heatSet": zone1delta, "coolSet": -5},
+                        {"zoneId": 2, "heatSet": zone2delta, "coolSet": -5}
+                    ]
+                }
+            ]
+        }
+        payload = specialstatuses[specialstatus]
+
+        resp = session.post(
+            f'https://aquarea-smart.panasonic.com/remote/v1/api/devices/{deviceGuid}',
+            headers = headers,
+            data = json.dumps(payload),
+            verify=False
+        )
+        try:
+            status_data = json.loads(resp.text)
+        except:
+            print(resp.text)
+        if do_logout:
+            # Logime välja
+            _ = logout(session)
+    return status_data
+
+# Lylitav Aquaerea tank mode:
+def set_tank_specialstatus(session=None, operation_status=0, aquarea_status=None):
+    status_data = None
+    if not session: # Kui sessiooni pole alustatud, logime sisse
+        session, login_resp = login(verbose=False)
+        do_logout = True
+    else:
+        do_logout = False
+
+    if not aquarea_status:
+        aquarea_status = get_status(session)
+
+    if aquarea_status and aquarea_status['errorCode'] == 0 and aquarea_status['status'][0]['operationStatus'] == 1:
+        timestamp = timestamp_now()
+        # Küsime andmed
+        deviceGuid = session.cookies['selectedDeviceId']
+        accessToken = session.cookies['accessToken']
+        selectedDeviceId = session.cookies['selectedDeviceId']
+        selectedGwid = session.cookies['selectedGwid']
+        cookies = [
+            f'selectedGwid={selectedGwid}',
+            f'selectedDeviceId={selectedDeviceId}',
+            'operationDeviceTop=1',
+            f'accessToken={accessToken}',
+            f'deviceControlDate={timestamp}'
+        ]
+        headers = {
+            'Host': 'aquarea-smart.panasonic.com',
+            'Connection': 'keep-alive',
+            'Cache-Control': 'max-age=0',
+            'Upgrade-Insecure-Requests': '1',
+            'Origin': 'https://aquarea-smart.panasonic.com',
+            'Content-Type': 'application/json;charset=UTF-8',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Mobile Safari/537.36',
+            'Accept': 'application/json, text/javascript, */*; q=0.01',
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-User': '?1',
+            'Sec-Fetch-Dest': 'document',
+            'Referer': 'https://aquarea-smart.panasonic.com/remote/a2wControl',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Language': 'et-EE,et;q=0.9,en;q=0.8,ja;q=0.7',
+            'Cookie': ';'.join(cookies),
+        }
+
+        # tank temperature set:
+        payload_set_tankStatus = {"status":[{"deviceGuid":deviceGuid,"tankStatus":[{"heatSet":45}]}]}
+
+        payload_set_tankOperation = {
+            "status": [
+                {
+                    "deviceGuid": deviceGuid,
+                    "operationStatus": 1,
+                    "zoneStatus": [
+                        {"zoneId": 1, "operationStatus": aquarea_status['status'][0]['zoneStatus'][0]['operationStatus']},
+                        {"zoneId": 2, "operationStatus": aquarea_status['status'][0]['zoneStatus'][1]['operationStatus']}
+                    ],
+                    "tankStatus": [{"operationStatus": operation_status}],
+                    "operationMode": -1
+                }
+            ]
+        }
+
+        payload = payload_set_tankOperation
+
+        resp = session.post(
+            f'https://aquarea-smart.panasonic.com/remote/v1/api/devices/{deviceGuid}',
+            headers = headers,
+            data = json.dumps(payload),
+            verify=False
+        )
+        try:
+            status_data = json.loads(resp.text)
+        except:
+            print(resp.text)
     if do_logout:
         # Logime välja
         _ = logout(session)
@@ -399,7 +481,7 @@ def set_specialstatus(session=None, specialstatus=0, zone1delta=5, zone2delta=2)
 #     return JsonResponse(status)
 
 # Tagastab Aquarea nädalagraafiku
-def weekly_timer(session=None):
+def get_weekly_timer(session=None):
     # Logime sisse
     # session = login()
 
@@ -617,12 +699,18 @@ def set_weeklytimer(session=None):
 if __name__ == "__main__":
     session, login_resp = login(verbose=True)
     print(login_resp)
+    aquarea_status = get_status(session)
+    # print(status)
+    # resp = set_heat_specialstatus(session=session, specialstatus=0, zone1delta=0, zone2delta=0)
+    # print(resp)
+    resp = set_tank_specialstatus(
+        session=session,
+        operation_status=1,
+        aquarea_status=aquarea_status
+    )
+    print(resp)
     # status = get_status(session)
     # print(status)
-    resp = set_specialstatus(session=session, specialstatus=0, zone1delta=0, zone2delta=0)
-    print(resp)
-    status = get_status(session)
-    print(status)
     # timer = weekly_timer(session)
     # print(timer)
     # con_day = consum(session, date_string='2022-03-31', verbose=True)

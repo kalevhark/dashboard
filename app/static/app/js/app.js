@@ -193,16 +193,32 @@ function update_aquarea_smrt_data_day(url, chart) {
 
       // console.log(data.status.status[0].zoneStatus[0].operationStatus);
       if (data.status.status[0].zoneStatus[0].operationStatus === 1) {
-        $("#zone1Status_temp_target").show();
         $("#z1_water_temp").addClass('color-red');
+        elZone1StatusTempTarget = $("#zone1Status_temp_target")
+        elZone1StatusTempTarget.removeClass('color-red color-green');
+        elZone1StatusTempTarget.show();
+        if (data.status.status[0].specialStatus[0].operationStatus === 1) {
+          elZone1StatusTempTarget.addClass('color-green');
+        }
+        if (data.status.status[0].specialStatus[1].operationStatus === 1) {
+          elZone1StatusTempTarget.addClass('color-red');
+        }
       } else {
         $("#zone1Status_temp_target").hide();
       };
       $("#img21").removeClass('spinner');
 
       if (data.status.status[0].zoneStatus[1].operationStatus === 1) {
-        $("#zone2Status_temp_target").show();
         $("#z2_water_temp").addClass('color-red');
+        elZone2StatusTempTarget = $("#zone2Status_temp_target")
+        elZone2StatusTempTarget.removeClass('color-red color-green');
+        elZone2StatusTempTarget.show();
+        if (data.status.status[0].specialStatus[0].operationStatus === 1) {
+          elZone2StatusTempTarget.addClass('color-green');
+        }
+        if (data.status.status[0].specialStatus[1].operationStatus === 1) {
+          elZone2StatusTempTarget.addClass('color-red');
+        }
       } else {
         $("#zone2Status_temp_target").hide();
       };
