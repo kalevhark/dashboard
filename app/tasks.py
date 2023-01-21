@@ -138,8 +138,7 @@ def change_ledvance_status(aquarea_status):
         # Arvutame soovitud ja hetke temperatuuri erinevuse
         gap = heat_set - temperature_now
         if operation_status == 0 and gap > 4:
-            pass
-            # ledvance_util.turnon(hours=1) # lülitame ledvance sisse
+            ledvance_util.turnon(hours=1) # lülitame ledvance sisse
 
 if __name__ == '__main__':
     session, _ = aquarea_smart_util.login()
