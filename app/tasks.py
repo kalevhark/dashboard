@@ -25,24 +25,24 @@ else:
 
 try:
     from app import views
-    from app.utils import aquarea_smart_util
+    from app.utils import aquarea_smart_util, ledvance_util
 except: # kui käivitatakse lokaalselt
     import views
-    from utils import aquarea_smart_util
+    from utils import aquarea_smart_util, ledvance_util
 
 def get_special_status_predict(outdoorNow, next_hour_airtemperature):
     # Arvutame järgmise tunni aja prognoositava muutuse
     delta = round(next_hour_airtemperature - outdoorNow, 1)
     special_mode = 0
     zone1delta, zone2delta = 0, 0
-    if delta > 2 and next_hour_airtemperature > 5: # oodata on temp t6usu -> eco
+    if delta > 2 and next_hour_airtemperature > 4: # oodata on temp t6usu -> eco
         special_mode = 1
         zone1delta, zone2delta = -2, -1
         if delta > 4:
             zone1delta, zone2delta = -4, -2
         if delta > 8:
             zone1delta, zone2delta = -6, -3
-    if delta < -2 and outdoorNow > 5: # oodata on temp langust -> comfort
+    if delta < -2 and outdoorNow > 4: # oodata on temp langust -> comfort
         special_mode = 2
         zone1delta, zone2delta = 2, 1
         if delta < -4:
@@ -125,6 +125,22 @@ def change_tank_status(session, aquarea_status):
         }
         return tank_status_dict
 
+def change_ledvance_status(aquarea_status):
+    ledvance_status = ledvance_util.status()
+    ledvance_on = ledvance_status['dps']['1']
+    if not ledvance_on and aquarea_status and aquarea_status['errorCode'] == 0:
+        # Aquarea registreeritud välistemperatuur
+        outdoorNow = aquarea_status['status'][0]['outdoorNow']
+        # Aquarea tank hetkenäitajad
+        operation_status = aquarea_status['status'][0]['tankStatus'][0]['operationStatus']
+        temperature_now = aquarea_status['status'][0]['tankStatus'][0]['temparatureNow']
+        heat_set = aquarea_status['status'][0]['tankStatus'][0]['heatSet']
+        # Arvutame soovitud ja hetke temperatuuri erinevuse
+        gap = heat_set - temperature_now
+        if operation_status == 0 and gap > 4:
+            pass
+            # ledvance_util.turnon(hours=1) # lülitame ledvance sisse
+
 if __name__ == '__main__':
     session, _ = aquarea_smart_util.login()
     aquarea_status = aquarea_smart_util.get_status(session)
@@ -133,4 +149,5 @@ if __name__ == '__main__':
     print([f'{key}: {value}' for key, value in result.items()])
     result = change_tank_status(session, aquarea_status) # on, off
     print([f'{key}: {value}' for key, value in result.items()])
+    change_ledvance_status(aquarea_status) # on
     _ = aquarea_smart_util.logout(session)

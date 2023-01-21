@@ -441,7 +441,7 @@ def get_aquarea_smrt_data_day(request):
     eile_tank = sum(filter(None, eile_consum['dateData'][0]['dataSets'][0]['data'][2]['values']))
 
     # Nädalagraafik
-    weekly_timer = aqsmrt.weekly_timer(session)
+    weekly_timer = aqsmrt.get_weekly_timer(session)
 
     # Logime välja
     _ = aqsmrt.logout(session)
