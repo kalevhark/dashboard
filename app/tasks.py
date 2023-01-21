@@ -14,16 +14,16 @@ OUTDOOR_TANK_GAP = 4 # millisest temperatuurilangusest alates hakatakse kütma t
 if __name__ == "__main__":
     import os
     import django
-    from django.test.utils import setup_test_environment
+    # from django.test.utils import setup_test_environment
     os.environ['DJANGO_SETTINGS_MODULE'] = 'dashboard.settings'
     django.setup()
-    setup_test_environment()
-    from django.conf import settings
+    # setup_test_environment()
+    # from django.conf import settings
     # UTIL_DIR = Path(__file__).resolve().parent  / 'utils'
     # Build paths inside the project like this: UTIL_DIR / 'subdir'.
     # print('Töökataloog:', UTIL_DIR)
-else:
-    from django.conf import settings
+# else:
+    # from django.conf import settings
     # UTIL_DIR = settings.BASE_DIR / 'app' / 'utils'
 
 try:
