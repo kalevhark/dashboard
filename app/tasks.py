@@ -5,13 +5,16 @@
 # Käivitamiseks:
 # /python-env-path-to/python3 /path-to-wiki-app/tasks.py
 import datetime
-from pathlib import Path
+# from pathlib import Path
+
+OUTDOOR_HEAT_EFFICENCY_TEMP = 0 # õhutemperatuur, millest alates COP>=2,9
+OUTDOOR_TANK_EFFICENCY_TEMP = 5 # õhutemperatuur, millest alates COP>=1,6
+OUTDOOR_TANK_GAP = 4 # millisest temperatuurilangusest alates hakatakse kütma tarbevett
 
 if __name__ == "__main__":
     import os
     import django
     from django.test.utils import setup_test_environment
-
     os.environ['DJANGO_SETTINGS_MODULE'] = 'dashboard.settings'
     django.setup()
     setup_test_environment()
@@ -35,14 +38,14 @@ def get_special_status_predict(outdoorNow, next_hour_airtemperature):
     delta = round(next_hour_airtemperature - outdoorNow, 1)
     special_mode = 0
     zone1delta, zone2delta = 0, 0
-    if delta > 2 and next_hour_airtemperature > 4: # oodata on temp t6usu -> eco
+    if delta > 2 and next_hour_airtemperature > OUTDOOR_HEAT_EFFICENCY_TEMP: # oodata on temp t6usu -> eco
         special_mode = 1
         zone1delta, zone2delta = -2, -1
         if delta > 4:
             zone1delta, zone2delta = -4, -2
         if delta > 8:
             zone1delta, zone2delta = -6, -3
-    if delta < -2 and outdoorNow > 4: # oodata on temp langust -> comfort
+    if delta < -2 and outdoorNow > OUTDOOR_HEAT_EFFICENCY_TEMP: # oodata on temp langust -> comfort
         special_mode = 2
         zone1delta, zone2delta = 2, 1
         if delta < -4:
@@ -107,7 +110,7 @@ def change_tank_status(session, aquarea_status):
     if aquarea_status and aquarea_status['errorCode'] == 0 and aquarea_status['status'][0]['operationStatus'] == 1:
         # Aquarea registreeritud välistemperatuur
         outdoorNow = aquarea_status['status'][0]['outdoorNow']
-        tank_status_predict = 0 if outdoorNow < 0 else 1
+        tank_status_predict = 0 if outdoorNow < OUTDOOR_TANK_EFFICENCY_TEMP else 1
         tank_status_current = aquarea_status['status'][0]['tankStatus'][0]['operationStatus']
         change = (tank_status_current != tank_status_predict)
         if change:
@@ -137,7 +140,7 @@ def change_ledvance_status(aquarea_status):
         heat_set = aquarea_status['status'][0]['tankStatus'][0]['heatSet']
         # Arvutame soovitud ja hetke temperatuuri erinevuse
         gap = heat_set - temperature_now
-        if operation_status == 0 and gap > 4:
+        if outdoorNow < OUTDOOR_TANK_EFFICENCY_TEMP and operation_status == 0 and gap > OUTDOOR_TANK_GAP:
             ledvance_util.turnon(hours=1) # lülitame ledvance sisse
 
 if __name__ == '__main__':

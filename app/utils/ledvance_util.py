@@ -7,10 +7,14 @@ try:
     TUYA_IP_ADDRESS = settings.TUYA_IP_ADDRESS
     TUYA_LOCAL_KEY = settings.TUYA_LOCAL_KEY
 except:
-    from decouple import config
-    TUYA_DEVICE_ID = config('TUYA_DEVICE_ID')
-    TUYA_IP_ADDRESS = config('TUYA_IP_ADDRESS')
-    TUYA_LOCAL_KEY = config('TUYA_LOCAL_KEY')
+    import dev_conf
+    TUYA_DEVICE_ID = dev_conf.TUYA_DEVICE_ID
+    TUYA_IP_ADDRESS = dev_conf.TUYA_IP_ADDRESS
+    TUYA_LOCAL_KEY = dev_conf.TUYA_LOCAL_KEY
+    # from decouple import config
+    # TUYA_DEVICE_ID = config('TUYA_DEVICE_ID')
+    # TUYA_IP_ADDRESS = config('TUYA_IP_ADDRESS')
+    # TUYA_LOCAL_KEY = config('TUYA_LOCAL_KEY')
 
 import tinytuya
 
