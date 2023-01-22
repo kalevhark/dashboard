@@ -60,13 +60,13 @@ def get_special_status_predict(outdoorNow, next_hour_airtemperature):
 
 # Kas Aquearea töörežimi on vaja muuta
 def change_special_status(session, aquarea_status):
-    if aquarea_status and aquarea_status['errorCode'] == 0 and aquarea_status['status'][0]['operationStatus'] == 1:
+    if isinstance(aquarea_status, dict) and aquarea_status['errorCode'] == 0 and aquarea_status['status'][0]['operationStatus'] == 1:
         # Aquarea registreeritud välistemperatuur
         outdoorNow = aquarea_status['status'][0]['outdoorNow']
         # Ilmateenistuse registreeritud välistemperatuur
         ilm_now = views.get_ilmateenistus_now()
         # print(ilm_now)
-        this_hour_airtemperature = ilm_now['airtemperature']
+        this_hour_airtemperature = ilm_now.get('airtemperature')
         # yr.no prognoositav välistemperatuur
         yrno_forecast = views.get_yrno_forecast(hours=6)
         # print(yrno_forecast)
@@ -107,11 +107,13 @@ def change_special_status(session, aquarea_status):
 
 # Kas Aquearea töörežimi on vaja muuta
 def change_tank_status(session, aquarea_status):
-    if aquarea_status and aquarea_status['errorCode'] == 0 and aquarea_status['status'][0]['operationStatus'] == 1:
+    if isinstance(aquarea_status, dict) and aquarea_status['errorCode'] == 0 and aquarea_status['status'][0]['operationStatus'] == 1:
         # Aquarea registreeritud välistemperatuur
         outdoorNow = aquarea_status['status'][0]['outdoorNow']
         tank_status_predict = 0 if outdoorNow < OUTDOOR_TANK_EFFICENCY_TEMP else 1
         tank_status_current = aquarea_status['status'][0]['tankStatus'][0]['operationStatus']
+        tank_temperature_now = aquarea_status['status'][0]['tankStatus'][0]['temparatureNow']
+        tank_heat_set = aquarea_status['status'][0]['tankStatus'][0]['heatSet']
         change = (tank_status_current != tank_status_predict)
         if change:
             aquarea_smart_util.set_tank_operationstatus(
@@ -124,6 +126,8 @@ def change_tank_status(session, aquarea_status):
             'outdoorNow': outdoorNow,
             'tank_status_current': tank_status_current,
             'tank_status_predict': tank_status_predict,
+            'tank_temperature_now': tank_temperature_now,
+            'tank_heat_set': tank_heat_set,
             'change': change
         }
         return tank_status_dict
@@ -148,8 +152,8 @@ if __name__ == '__main__':
     aquarea_status = aquarea_smart_util.get_status(session)
     # print(aquarea_status)
     result = change_special_status(session, aquarea_status) # normal, eco, comfort
-    print([f'{key}: {value}' for key, value in result.items()])
+    print('heat:', [f'{key}: {value}' for key, value in result.items()])
     result = change_tank_status(session, aquarea_status) # on, off
-    print([f'{key}: {value}' for key, value in result.items()])
+    print('tank:', [f'{key}: {value}' for key, value in result.items()])
     change_ledvance_status(aquarea_status) # on
     _ = aquarea_smart_util.logout(session)
