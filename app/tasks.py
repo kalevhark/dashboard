@@ -135,17 +135,22 @@ def change_tank_status(session, aquarea_status):
 def change_ledvance_status(aquarea_status):
     ledvance_status = ledvance_util.status()
     ledvance_on = ledvance_status['dps']['1']
-    if not ledvance_on and aquarea_status and aquarea_status['errorCode'] == 0:
+    if aquarea_status and aquarea_status['errorCode'] == 0:
         # Aquarea registreeritud välistemperatuur
         outdoorNow = aquarea_status['status'][0]['outdoorNow']
         # Aquarea tank hetkenäitajad
         operation_status = aquarea_status['status'][0]['tankStatus'][0]['operationStatus']
         temperature_now = aquarea_status['status'][0]['tankStatus'][0]['temparatureNow']
         heat_set = aquarea_status['status'][0]['tankStatus'][0]['heatSet']
+        heat_max = aquarea_status['status'][0]['tankStatus'][0]['heatMax']
         # Arvutame soovitud ja hetke temperatuuri erinevuse
         gap = heat_set - temperature_now
-        if outdoorNow < OUTDOOR_TANK_EFFICENCY_TEMP and operation_status == 0 and gap > OUTDOOR_TANK_GAP:
-            ledvance_util.turnon(hours=1) # lülitame ledvance sisse
+        if ledvance_on: # Kui LDV on sisselylitatud
+            if gap < -2 * OUTDOOR_TANK_GAP:
+                ledvance_util.turnoff()  # lülitame ledvance v2lja
+        else: # Kui v2listemperatuur on v2iksem Aquarea tarbevee efektiivsest tootmistemperatuuris (COP < 1)
+            if outdoorNow < OUTDOOR_TANK_EFFICENCY_TEMP and gap >= heat_max:
+                ledvance_util.turnon(hours=1) # lülitame ledvance sisse
 
 if __name__ == '__main__':
     session, _ = aquarea_smart_util.login()

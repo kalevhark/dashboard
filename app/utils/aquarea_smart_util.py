@@ -700,7 +700,7 @@ if __name__ == "__main__":
     session, login_resp = login(verbose=True)
     print(login_resp)
     aquarea_status = get_status(session)
-    # print(status)
+    print(aquarea_status)
     # resp = set_heat_specialstatus(session=session, specialstatus=0, zone1delta=0, zone2delta=0)
     # print(resp)
     resp = set_tank_operationstatus(
