@@ -148,14 +148,16 @@ def change_ledvance_status(aquarea_status):
         if ledvance_on: # Kui LDV on sisselylitatud
             if temperature_now <= heat_max:
                 ledvance_util.turnoff()  # lülitame ledvance v2lja
+                print('LDV off')
         else: # Kui v2listemperatuur on v2iksem Aquarea tarbevee efektiivsest tootmistemperatuuris (COP < 1)
             if outdoorNow < OUTDOOR_TANK_EFFICENCY_TEMP and gap > OUTDOOR_TANK_GAP:
                 ledvance_util.turnon(hours=1) # lülitame ledvance sisse
+                print('LDV on=1h')
 
 if __name__ == '__main__':
     session, _ = aquarea_smart_util.login()
     aquarea_status = aquarea_smart_util.get_status(session)
-    # print(aquarea_status)
+    print(aquarea_status)
     result = change_special_status(session, aquarea_status) # normal, eco, comfort
     print('heat:', [f'{key}: {value}' for key, value in result.items()])
     result = change_tank_status(session, aquarea_status) # on, off
