@@ -84,15 +84,16 @@ def change_special_status(session, aquarea_status):
         special_status_predict['zoneStatus'][0]['heatSet'] = zone1delta
         special_status_predict['zoneStatus'][1]['heatSet'] = zone2delta
         special_status_predict['specialStatus'] = special_status_status
-        # kontrollime kas vaja muuta
+        # kontrollime kas vaja muuta ja kui vaja, siis muudame rezhiimi
         change = (special_status_current != special_status_predict)
-        if False: # change:
+        if change:
             aquarea_smart_util.set_heat_specialstatus(
                 session=session,
                 special_mode=special_mode,
                 zone1delta=zone1delta,
                 zone2delta=zone2delta
             )
+            print('Aquarea: change status done')
         special_status_dict = {
             'dt': datetime.datetime.now().strftime('%d.%m.%Y %H:%M'),
             'outdoorNow': outdoorNow,
