@@ -147,7 +147,7 @@ def change_ledvance_status(aquarea_status):
         # Arvutame soovitud ja hetke temperatuuri erinevuse
         gap = heat_set - temperature_now
         if ledvance_on: # Kui LDV on sisselylitatud
-            if temperature_now <= heat_max:
+            if temperature_now >= heat_max:
                 ledvance_util.turnoff()  # lülitame ledvance v2lja
                 print('LDV off')
         else: # Kui v2listemperatuur on v2iksem Aquarea tarbevee efektiivsest tootmistemperatuuris (COP < 1)
