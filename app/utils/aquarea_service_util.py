@@ -18,6 +18,11 @@ except:
 
 import pytz
 
+def float_or_none(datafield:str):
+    try:
+        return float(datafield)
+    except:
+        return None
 #
 # Aquarea Service andmete lugemine failist
 #
@@ -114,7 +119,7 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
         # Küsime soovitud tundide logi
         logDate = int(dateTime_last_hours_fullhour.timestamp() * 1000)
 
-        items = '%2C'.join([f'{n}' for n in range(0, 71)])  # '%2C' = ','
+        items = '%2C'.join([f'{n}' for n in range(0, 77)])  # '%2C' = ','
         logItems = '%7B%22logItems%22%3A%5B' + items + '%5D%7D'  # '{"logItems":[' + items + ']}'
         ##        params = {
         ##            'var.deviceId': deviceId,
@@ -148,15 +153,15 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
 
     # Töötleme andmed graafiku jaoks
     elements = [
-        34,  # Actual outdoor temperature [°C]
-        35,  # Inlet water temperature [°C]
-        36,  # Outlet water temperature [°C]
-        37,  # Zone1: Water temperature [°C]
-        38,  # Zone2: Water temperature [°C]
-        65,  # Heat mode energy consumption [kW]
-        66,  # Heat mode energy generation [kW]
-        69,  # Tank mode energy consumption [kW]
-        70,  # Tank mode energy generation [kW]
+        34+5,  # Actual outdoor temperature [°C]
+        35+5,  # Inlet water temperature [°C]
+        36+5,  # Outlet water temperature [°C]
+        37+5,  # Zone1: Water temperature [°C]
+        38+5,  # Zone2: Water temperature [°C]
+        65+5,  # Heat mode energy consumption [kW]
+        66+5,  # Heat mode energy generation [kW]
+        69+5,  # Tank mode energy consumption [kW]
+        70+5,  # Tank mode energy generation [kW]
     ]
 
     act_outd_temp = []
@@ -180,23 +185,23 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
         # kuupäev
         cat_date = round((row_date - dateTime_last_hours_fullhour).seconds / 3600, 2)
         # välistemperatuur
-        act_outd_temp.append([cat_date, float(logiandmed_dict[row][34])])
+        act_outd_temp.append([cat_date, float_or_none(logiandmed_dict[row][34+5])])
         # pumpa sisenev ja väljuv temperatuur
-        ilet_water_temp.append([cat_date, float(logiandmed_dict[row][35])])
-        olet_water_temp.append([cat_date, float(logiandmed_dict[row][36])])
-        z1_water_temp.append([cat_date, float(logiandmed_dict[row][37])])
-        z2_water_temp.append([cat_date, float(logiandmed_dict[row][38])])
-        z1_water_temp_target.append([cat_date, float(logiandmed_dict[row][39])])
-        z2_water_temp_target.append([cat_date, float(logiandmed_dict[row][40])])
-        tank_temp.append([cat_date, float(logiandmed_dict[row][33])])
-        tank_temp_target.append([cat_date, float(logiandmed_dict[row][11])])
-        heat_con_row = float(logiandmed_dict[row][65])
+        ilet_water_temp.append([cat_date, float_or_none(logiandmed_dict[row][35+5])])
+        olet_water_temp.append([cat_date, float_or_none(logiandmed_dict[row][36+5])])
+        z1_water_temp.append([cat_date, float_or_none(logiandmed_dict[row][37+5])])
+        z2_water_temp.append([cat_date, float_or_none(logiandmed_dict[row][38+5])])
+        z1_water_temp_target.append([cat_date, float_or_none(logiandmed_dict[row][39+5])])
+        z2_water_temp_target.append([cat_date, float_or_none(logiandmed_dict[row][40+5])])
+        tank_temp.append([cat_date, float_or_none(logiandmed_dict[row][33+5])])
+        tank_temp_target.append([cat_date, float_or_none(logiandmed_dict[row][11])])
+        heat_con_row = float_or_none(logiandmed_dict[row][65+5])
         heat_con.append([cat_date, heat_con_row])
-        tank_con_row = float(logiandmed_dict[row][69])
+        tank_con_row = float_or_none(logiandmed_dict[row][69+5])
         tank_con.append([cat_date, tank_con_row])
-        heat_gen_row = float(logiandmed_dict[row][66])
+        heat_gen_row = float_or_none(logiandmed_dict[row][66+5])
         heat_gen.append([cat_date, heat_gen_row])
-        tank_gen_row = float(logiandmed_dict[row][70])
+        tank_gen_row = float_or_none(logiandmed_dict[row][70+5])
         tank_gen.append([cat_date, tank_gen_row])
         tot_gen_row = heat_gen_row + tank_gen_row
         tot_gen.append([
