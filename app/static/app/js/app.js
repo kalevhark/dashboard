@@ -3,6 +3,10 @@ function getDirection(angle) {
   return directions[Math.round(((angle %= 360) < 0 ? angle + 360 : angle) / 45) % 8];
 }
 
+function addZero(i) {
+  if (i < 10) {i = "0" + i}
+  return i;
+}
 
 function update_xaxis_categories(url, chart) {
   // Küsime x-telje andmed ja täiendame graafikut
@@ -427,12 +431,21 @@ function update_get_tuyaapi_data(url, chart) {
     },
     success: function (data) {
       console.log(data);
+      let el = document.getElementById("img23a");
       if (data.dps['1']) {
         // console.log('ON');
-        document.getElementById("img23a").style.visibility = "visible";
+        let secondsLeft = Number(data.dps['9'])
+        const d = new Date();
+        d.setSeconds(secondsLeft);
+        let h = addZero(d.getHours());
+        let m = addZero(d.getMinutes());
+        let s = addZero(d.getSeconds());
+        el.title = "kuni: " + h + ":" + m + ":" + s;
+        el.style.visibility = "visible";
       } else {
         // console.log('OFF');
-        document.getElementById("img23a").style.visibility = "hidden";
+        el.title = null;
+        el.style.visibility = "hidden";
       }
       // $('#jooksva_perioodi_tot').text((data.jooksva_perioodi_heat+data.jooksva_perioodi_tank).toFixed(1));
     },

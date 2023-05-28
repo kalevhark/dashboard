@@ -482,8 +482,11 @@ def set_tank_operationstatus(session=None, operation_status=0, aquarea_status=No
 
 # Tagastab Aquarea nädalagraafiku
 def get_weekly_timer(session=None):
-    # Logime sisse
-    # session = login()
+    if not session:  # Kui sessiooni pole alustatud, logime sisse
+        session, login_resp = login(verbose=False)
+        do_logout = True
+    else:
+        do_logout = False
 
     # Küsime andmed
     url = 'https://aquarea-smart.panasonic.com/remote/weekly_timer'
@@ -543,13 +546,16 @@ def get_weekly_timer(session=None):
     raw_data_string = raw_data_string.replace('\\', '')
     # Teisendame sringist jsoni nädalaseadistuse andmed
     weekly_timer_data = json.loads(raw_data_string)
+    if do_logout:
+        # Logime välja
+        _ = logout(session)
     return weekly_timer_data['weeklytimer'][0]['timer'] # , safe=False
 
 # Lylitav Aquaerea mode:
 # normal:  specialStatus = 0
 # eco:     specialStatus = 1
 # comfort: specialStatus = 2
-def set_weeklytimer(session=None):
+def set_weeklytimer(session=None, mode=2):
     if not session:
         # Logime sisse
         session, login_resp = login(verbose=False)
@@ -593,25 +599,25 @@ def set_weeklytimer(session=None):
     # week 0 = esmaspäev
     weeklytimer = {
         0: [
-            {'mode': 2, 'start': '00:00', 'zoneStatusHeatSet': 0, 'tankStatusHeatSet': 40},
-            {'mode': 2, 'start': '07:00', 'zoneStatusHeatSet': -2, 'tankStatusHeatSet': 40},
-            {'mode': 2, 'start': '16:00', 'zoneStatusHeatSet': 0, 'tankStatusHeatSet': 40},
+            {'mode': mode, 'start': '00:00', 'zoneStatusHeatSet': 0, 'tankStatusHeatSet': 40},
+            {'mode': mode, 'start': '07:00', 'zoneStatusHeatSet': -2, 'tankStatusHeatSet': 40},
+            {'mode': mode, 'start': '16:00', 'zoneStatusHeatSet': 0, 'tankStatusHeatSet': 40},
         ],
         1: [
-            {'mode': 2, 'start': '07:00', 'zoneStatusHeatSet': -2, 'tankStatusHeatSet': 40},
-            {'mode': 2, 'start': '16:00', 'zoneStatusHeatSet': 0, 'tankStatusHeatSet': 40},
+            {'mode': mode, 'start': '07:00', 'zoneStatusHeatSet': -2, 'tankStatusHeatSet': 40},
+            {'mode': mode, 'start': '16:00', 'zoneStatusHeatSet': 0, 'tankStatusHeatSet': 40},
         ],
         2: [
-            {'mode': 2, 'start': '07:00', 'zoneStatusHeatSet': -2, 'tankStatusHeatSet': 40},
-            {'mode': 2, 'start': '16:00', 'zoneStatusHeatSet': 0, 'tankStatusHeatSet': 40},
+            {'mode': mode, 'start': '07:00', 'zoneStatusHeatSet': -2, 'tankStatusHeatSet': 40},
+            {'mode': mode, 'start': '16:00', 'zoneStatusHeatSet': 0, 'tankStatusHeatSet': 40},
         ],
         3: [
-            {'mode': 2, 'start': '07:00', 'zoneStatusHeatSet': -2, 'tankStatusHeatSet': 40},
-            {'mode': 2, 'start': '16:00', 'zoneStatusHeatSet': 0, 'tankStatusHeatSet': 40},
+            {'mode': mode, 'start': '07:00', 'zoneStatusHeatSet': -2, 'tankStatusHeatSet': 40},
+            {'mode': mode, 'start': '16:00', 'zoneStatusHeatSet': 0, 'tankStatusHeatSet': 40},
         ],
         4: [
-            {'mode': 2, 'start': '07:00', 'zoneStatusHeatSet': -2, 'tankStatusHeatSet': 40},
-            {'mode': 2, 'start': '16:00', 'zoneStatusHeatSet': 0, 'tankStatusHeatSet': 45},
+            {'mode': mode, 'start': '07:00', 'zoneStatusHeatSet': -2, 'tankStatusHeatSet': 40},
+            {'mode': mode, 'start': '16:00', 'zoneStatusHeatSet': 0, 'tankStatusHeatSet': 45},
         ],
     }
 
