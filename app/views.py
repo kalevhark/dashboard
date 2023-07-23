@@ -405,7 +405,7 @@ def index(request):
                 'id': 'nps_12plus12_hour_prices',
                 'name': 'EE börsihind',
                 'type': 'spline',
-                'data': [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6],
+                'data': [], # täidetakse ajax teenusega get_nps_12plus12_hours_data
                 'yAxis': 1,
                 'tooltip': {
                     'valueSuffix': ' s/kWh'
