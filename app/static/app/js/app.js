@@ -257,6 +257,30 @@ function update_aquarea_smrt_data_day(url, chart) {
   });
 };
 
+function update_nps_12plus12_hour_data(url, chart) {
+  // Küsime aquarea andmed ja täiendame graafikut
+  $.ajax({
+    url: url,
+    dataType: 'json',
+    timeout: 300000,
+	  beforeSend: function() {
+      // $("#loaderDiv3").show();
+      // $("#img31").addClass('spinner');
+    },
+    success: function (data) {
+      console.log(data);
+      chart.get('nps_12plus12_hour_prices').update({data: data.nps_12plus12_hour_prices});
+      // $("#img31").removeClass('spinner');
+    },
+    error: function (XMLHttpRequest, textstatus, errorThrown) {
+	  console.log(XMLHttpRequest, textstatus, errorThrown);
+    },
+	  complete: function () {
+	    // $("#loaderDiv3").hide();
+	  }
+  });
+};
+
 function update_aquarea_smrt_data_month(url, chart) {
   // Küsime:
   // - aquarea selle ja eelmise kuu andmed

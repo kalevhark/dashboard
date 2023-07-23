@@ -18,6 +18,7 @@ import app.utils.aquarea_service_util as aqserv
 import app.utils.aquarea_smart_util as aqsmrt
 from app.utils.astral_util import get_day_or_night_plotbands
 import app.utils.ephem_util as ephem_data
+import app.utils.nps_util as nps_util
 
 DEBUG = False
 DEGREE_CELSIUS = u'\N{DEGREE CELSIUS}'
@@ -310,96 +311,110 @@ def index(request):
                 }
             }
         },
-        'series': [{
-            'id': 'last_12hour_outdoor_temp',
-            'name': 'Välistemperatuur',
-            'type': 'spline',
-            'data': [], # last_12hour_outdoor_temp, # [-7.0, -6.9, 9.5, 14.5, 18.2, 21.5, -25.2, -26.5, 23.3, 18.3, 13.9, 9.6],
-            'yAxis': 1,
-            'tooltip': {
-                'valueSuffix': '°C'
+        'series': [
+            {
+                'id': 'last_12hour_outdoor_temp',
+                'name': 'Välistemperatuur',
+                'type': 'spline',
+                'data': [], # last_12hour_outdoor_temp, # [-7.0, -6.9, 9.5, 14.5, 18.2, 21.5, -25.2, -26.5, 23.3, 18.3, 13.9, 9.6],
+                'yAxis': 1,
+                'tooltip': {
+                    'valueSuffix': '°C'
+                },
+                'zIndex': 3,
+                'color': '#FF3333',
+                'negativeColor': '#48AFE8'
+            }, {
+                'id': 'next_12hour_outdoor_temp',
+                'name': 'Välistemperatuur (prognoos)',
+                'type': 'spline',
+                'data': [],
+                'yAxis': 1,
+                'tooltip': {
+                    'valueSuffix': '°C'
+                },
+                'zIndex': 1,
+                'dashStyle': 'shortdot',
+                'color': '#FF3333',
+                'negativeColor': '#48AFE8'
+            }, {
+                'id': 'last_12hour_tot_gen_plus',
+                'name': 'Kasu',
+                'yAxis': 0,
+                'pointWidth': 3,
+                'data': [],
+                'color': '#00ff00',
+                'zIndex': 2,
+                'stack': 'aquarea'
+            }, {
+                'id': 'last_12hour_consum_heat',
+                'name': 'Küte',
+                'yAxis': 0,
+                'pointWidth': 3,
+                'data': [], # last_12hour_consum_heat,
+                'color': '#F5C725',
+                'zIndex': 2,
+                'stack': 'aquarea'
+            }, {
+                'id': 'last_12hour_consum_tank',
+                'name': 'Vesi',
+                'yAxis': 0,
+                'pointWidth': 3,
+                'data': [], # last_12hour_consum_tank,
+                'color': '#FF8135',
+                'zIndex': 2,
+                'stack': 'aquarea'
+            }, {
+                'id': 'next_12hour_outdoor_prec_err',
+                'type': 'column',
+                'name': 'Sademed (prognoos err)',
+                'data': [],
+                'color': {
+                    'pattern': {
+                        'path': {
+                            'd': 'M 0 0 L 5 5 M 4.5 -0.5 L 5.5 0.5 M -0.5 4.5 L 0.5 5.5',
+                        },
+                        'width': 5,
+                        'height': 5,
+                        'color': '#68CFE8',
+                    }
+                },
+                'yAxis': 0,
+                'pointWidth': 20,
+                'grouping': False,
+                'tooltip': {
+                    'valueSuffix': ' mm'
+                },
+                'zIndex': 2,
+                'stack': 'prec'
+            }, {
+                'id': 'next_12hour_outdoor_prec_min',
+                'type': 'column',
+                'name': 'Sademed (prognoos min)',
+                'data': [],
+                'color': '#68CFE8',
+                'yAxis': 0,
+                'pointWidth': 20,
+                'grouping': False,
+                'tooltip': {
+                    'valueSuffix': ' mm'
+                },
+                'zIndex': 2,
+                'stack': 'prec'
+            }, {
+                'id': 'nps_12plus12_hour_prices',
+                'name': 'EE börsihind',
+                'type': 'spline',
+                'data': [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6],
+                'yAxis': 1,
+                'tooltip': {
+                    'valueSuffix': ' s/kWh'
+                },
+                'zIndex': 1,
+                'dashStyle': 'shortdot',
+                'color': '#9E32A8',
+                # 'negativeColor': '#48AFE8'
             },
-            'zIndex': 3,
-            'color': '#FF3333',
-            'negativeColor': '#48AFE8'
-        }, {
-            'id': 'next_12hour_outdoor_temp',
-            'name': 'Välistemperatuur (prognoos)',
-            'type': 'spline',
-            'data': [],
-            'yAxis': 1,
-            'tooltip': {
-                'valueSuffix': '°C'
-            },
-            'zIndex': 1,
-            'dashStyle': 'shortdot',
-            'color': '#FF3333',
-            'negativeColor': '#48AFE8'
-        }, {
-            'id': 'last_12hour_tot_gen_plus',
-            'name': 'Kasu',
-            'yAxis': 0,
-            'pointWidth': 3,
-            'data': [],
-            'color': '#00ff00',
-            'zIndex': 2,
-            'stack': 'aquarea'
-        }, {
-            'id': 'last_12hour_consum_heat',
-            'name': 'Küte',
-            'yAxis': 0,
-            'pointWidth': 3,
-            'data': [], # last_12hour_consum_heat,
-            'color': '#F5C725',
-            'zIndex': 2,
-            'stack': 'aquarea'
-        }, {
-            'id': 'last_12hour_consum_tank',
-            'name': 'Vesi',
-            'yAxis': 0,
-            'pointWidth': 3,
-            'data': [], # last_12hour_consum_tank,
-            'color': '#FF8135',
-            'zIndex': 2,
-            'stack': 'aquarea'
-        }, {
-            'id': 'next_12hour_outdoor_prec_err',
-            'type': 'column',
-            'name': 'Sademed (prognoos err)',
-            'data': [],
-            'color': {
-                'pattern': {
-                    'path': {
-                        'd': 'M 0 0 L 5 5 M 4.5 -0.5 L 5.5 0.5 M -0.5 4.5 L 0.5 5.5',
-                    },
-                    'width': 5,
-                    'height': 5,
-                    'color': '#68CFE8',
-                }
-            },
-            'yAxis': 0,
-            'pointWidth': 20,
-            'grouping': False,
-            'tooltip': {
-                'valueSuffix': ' mm'
-            },
-            'zIndex': 2,
-            'stack': 'prec'
-	    }, {
-            'id': 'next_12hour_outdoor_prec_min',
-            'type': 'column',
-            'name': 'Sademed (prognoos min)',
-            'data': [],
-            'color': '#68CFE8',
-            'yAxis': 0,
-            'pointWidth': 20,
-            'grouping': False,
-            'tooltip': {
-                'valueSuffix': ' mm'
-            },
-            'zIndex': 2,
-            'stack': 'prec'
-	    },
         ]
     }
     context = {
@@ -655,3 +670,7 @@ def get_tuyaapi_data(request):
     d.set_version(3.3)
     tuyaapi_data = d.status()
     return JsonResponse(tuyaapi_data)
+
+def get_nps_12plus12_hours_data(request):
+    nps_12plus12_hour_prices_data = nps_util.get_nps_12plus12_hour_prices_ee_marginaaliga()
+    return JsonResponse(nps_12plus12_hour_prices_data)

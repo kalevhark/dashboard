@@ -17,6 +17,7 @@ urlpatterns = [
     path('get_aquarea_smrt_data_month', views.get_aquarea_smrt_data_month, name='get_aquarea_smrt_data_month'),
     path('get_aquarea_smrt_data_year', views.get_aquarea_smrt_data_year, name='get_aquarea_smrt_data_year'),
     path('get_tuyaapi_data', views.get_tuyaapi_data, name='get_tuyaapi_data'),
+    path('get_nps_12plus12_hours_data', views.get_nps_12plus12_hours_data, name='get_nps_12plus12_hours_data'),
     path('ezr/', views.get_ezr_data, name='ezr'),
     path('yrno/', views.get_yrno_forecast, name='yrno'),
     # path('log/<str:date_string>/', views.log, name='log'),

@@ -283,6 +283,9 @@ $(document).ready(function() {
   const url_get_aquarea_smrt_data_day = "{% url 'app:get_aquarea_smrt_data_day' %}";
   update_aquarea_smrt_data_day(url_get_aquarea_smrt_data_day, chart_24h);
 
+  const url_get_nps_12plus12_hours_data = "{% url 'app:get_nps_12plus12_hours_data' %}";
+  update_nps_12plus12_hour_data(url_get_nps_12plus12_hours_data, chart_24h);
+
   const url_get_aquarea_smrt_data_month = "{% url 'app:get_aquarea_smrt_data_month' %}";
   // update_aquarea_smrt_data_month(url_get_aquarea_smrt_data_month, chart_24h);
 
