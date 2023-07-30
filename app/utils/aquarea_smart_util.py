@@ -16,6 +16,11 @@ try:
     AQUAREA_USR = settings.AQUAREA_USR
     AQUAREA_PWD = settings.AQUAREA_PWD
 except:
+    import os
+    import django
+    # from django.test.utils import setup_test_environment
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'dashboard.settings'
+    django.setup()
     import dev_conf
     AQUAREA_USR = dev_conf.AQUAREA_USR
     AQUAREA_PWD = dev_conf.AQUAREA_PWD

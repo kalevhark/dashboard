@@ -1,5 +1,6 @@
 #!/usr/local/bin/python3
 from datetime import datetime, timedelta
+import csv
 import json
 import re
 import requests
@@ -12,6 +13,11 @@ try:
     AQUAREA_USR = settings.AQUAREA_USR
     AQUAREA_PWD_SERVICE = settings.AQUAREA_PWD_SERVICE
 except:
+    import os
+    import django
+    # from django.test.utils import setup_test_environment
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'dashboard.settings'
+    django.setup()
     import dev_conf
     AQUAREA_USR = dev_conf.AQUAREA_USR
     AQUAREA_PWD_SERVICE = dev_conf.AQUAREA_PWD_SERVICE
@@ -246,9 +252,22 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
     }
     return chart_data
 
+# Tagastab statistilise küttekulu 1h kohta iga täistemperatuuri väärtuse jaoks
+def get_con_per_1h(temp=0.0):
+    temp = -25.0 if temp < -25.0 else temp
+    temp = 20.0 if temp > 20.0 else temp
+    with open(settings.STATIC_ROOT / 'app' / 'data' / 'con_per_1h.csv', newline='', ) as csvfile:
+        reader = csv.DictReader(csvfile)
+        con_per_1h = dict()
+        for row in reader:
+            con_per_1h[float(row['Actual outdoor temperature [Â°C]'])] = float(row['Heat mode energy consumption mean [kWh]'])
+        # print(con_per_1h)
+    return con_per_1h[round(temp, 0)]
 
 if __name__ == "__main__":
-    data = loe_logiandmed_veebist(hours=11, verbose=True)
+    # data = loe_logiandmed_veebist(hours=11, verbose=True)
+    print(get_con_per_1h(temp=0.0))
+
 
 # Parameters
 """
