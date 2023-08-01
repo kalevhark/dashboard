@@ -72,7 +72,7 @@ def get_nps_12plus12_hour_prices():
 # Tagastab -12h kuni +12h tunnihinnad km+ga + EE marginaal
 def get_nps_12plus12_hour_prices_ee_marginaaliga():
     prices = get_nps_12plus12_hour_prices()
-    last_30days_prices_mean = get_last_30days_prices_mean()
+    last_30days_prices_mean = get_30days_prices_mean()
     return {
         'nps_12plus12_hour_prices': [
             {
@@ -84,11 +84,11 @@ def get_nps_12plus12_hour_prices_ee_marginaaliga():
         ]
     }
 
-# Tagastab viimase 30 põeva keskmise tunnihinna km+ga + EE marginaal
-def get_last_30days_prices_mean():
+# Tagastab viimase 29 põeva + 24h tuleviku keskmise tunnihinna km+ga + EE marginaal
+def get_30days_prices_mean():
     now = datetime.now()
-    loc_start = now.astimezone(TALLINN) - timedelta(days=30)
-    loc_end = now
+    loc_start = now.astimezone(TALLINN) - timedelta(days=29)
+    loc_end = now + timedelta(days=1)
     last_30days_prices = get_nps_prices(loc_start, loc_end)
     last_30days_prices_mean = round(
         mean(
@@ -108,4 +108,4 @@ if __name__ == "__main__":
         price = round(el['price'] / 1000 * 100 * 1.2, 3)
         price_marginaaliga = round(price + MARGINAAL, 3)
         print(f'{time_start.day:02d} {time_start.hour:02d}', price, price_marginaaliga)
-    print(get_last_30days_prices_mean())
+    print(get_30days_prices_mean())
