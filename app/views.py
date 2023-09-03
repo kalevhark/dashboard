@@ -284,8 +284,8 @@ def index(request):
             'opposite': True
         }],
         'tooltip': {
-            'headerFormat': '<b>{point.x}</b><br/>',
-            'pointFormat': '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+            'headerFormat': '<b>kell {point.x}:00</b><br/>',
+            'pointFormat': '{series.name}: {point.y}<br/>Kokku: {point.stackTotal}'
         },
         # 'annotations': [{
         #     'labels': [{
@@ -319,6 +319,7 @@ def index(request):
                 'data': [], # last_12hour_outdoor_temp, # [-7.0, -6.9, 9.5, 14.5, 18.2, 21.5, -25.2, -26.5, 23.3, 18.3, 13.9, 9.6],
                 'yAxis': 1,
                 'tooltip': {
+                    'pointFormat': '{series.name}: {point.y}',
                     'valueSuffix': '°C'
                 },
                 'zIndex': 3,
@@ -331,6 +332,7 @@ def index(request):
                 'data': [],
                 'yAxis': 1,
                 'tooltip': {
+                    'pointFormat': '{series.name}: {point.y}',
                     'valueSuffix': '°C'
                 },
                 'zIndex': 1,
@@ -383,6 +385,7 @@ def index(request):
                 'pointWidth': 20,
                 'grouping': False,
                 'tooltip': {
+                    # 'pointFormat': '{series.name}: {point.y}',
                     'valueSuffix': ' mm'
                 },
                 'zIndex': 2,
@@ -397,6 +400,7 @@ def index(request):
                 'pointWidth': 20,
                 'grouping': False,
                 'tooltip': {
+                    # 'pointFormat': '{series.name}: {point.y}',
                     'valueSuffix': ' mm'
                 },
                 'zIndex': 2,
@@ -408,6 +412,8 @@ def index(request):
                 'data': [], # täidetakse ajax teenusega get_nps_12plus12_hours_data
                 'yAxis': 1,
                 'tooltip': {
+                    # 'headerFormat': '<b>kell {point.x}:00</b><br/>',
+                    'pointFormat': '{series.name}: {point.y}<br/>Viimase 30p keskmine: {point.last_30days_prices_mean} s/kWh',
                     'valueSuffix': ' s/kWh'
                 },
                 'zIndex': 1,

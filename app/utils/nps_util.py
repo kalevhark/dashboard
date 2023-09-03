@@ -77,7 +77,8 @@ def get_nps_12plus12_hour_prices_ee_marginaaliga():
         'nps_12plus12_hour_prices': [
             {
                 'y': round(el['price'] / 1000 * 100 * 1.2 + MARGINAAL, 3),
-                'color': '#9E32A8' if round(el['price'] / 1000 * 100 * 1.2 + MARGINAAL, 3) > last_30days_prices_mean else 'green'
+                'color': '#9E32A8' if round(el['price'] / 1000 * 100 * 1.2 + MARGINAAL, 3) > last_30days_prices_mean else 'green',
+                'last_30days_prices_mean': last_30days_prices_mean
             }
             for el
             in prices
