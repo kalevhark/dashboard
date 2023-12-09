@@ -711,15 +711,16 @@ if __name__ == "__main__":
     session, login_resp = login(verbose=True)
     print(login_resp)
     aquarea_status = get_status(session)
-    print(aquarea_status)
+    # print(aquarea_status)
+    print(json.dumps(aquarea_status, indent=4))
     # resp = set_heat_specialstatus(session=session, specialstatus=0, zone1delta=0, zone2delta=0)
     # print(resp)
-    resp = set_tank_operationstatus(
-        session=session,
-        operation_status=1,
-        aquarea_status=aquarea_status
-    )
-    print(resp)
+    # resp = set_tank_operationstatus(
+    #     session=session,
+    #     operation_status=1,
+    #     aquarea_status=aquarea_status
+    # )
+    # print(resp)
     # status = get_status(session)
     # print(status)
     # timer = weekly_timer(session)

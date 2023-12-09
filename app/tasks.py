@@ -160,8 +160,10 @@ if __name__ == '__main__':
     aquarea_status = aquarea_smart_util.get_status(session)
     # print(aquarea_status)
     result = change_special_status(session, aquarea_status) # normal, eco, comfort
-    print('heat:', [f'{key}: {value}' for key, value in result.items()])
+    if result:
+        print('heat:', [f'{key}: {value}' for key, value in result.items()])
     result = change_tank_status(session, aquarea_status) # on, off
-    print('tank:', [f'{key}: {value}' for key, value in result.items()])
+    if result:
+        print('tank:', [f'{key}: {value}' for key, value in result.items()])
     change_ledvance_status(aquarea_status) # on
     _ = aquarea_smart_util.logout(session)

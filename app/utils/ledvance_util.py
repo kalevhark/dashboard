@@ -6,11 +6,17 @@ try:
     TUYA_DEVICE_ID = settings.TUYA_DEVICE_ID
     TUYA_IP_ADDRESS = settings.TUYA_IP_ADDRESS
     TUYA_LOCAL_KEY = settings.TUYA_LOCAL_KEY
+    TUYA_DEVICE_ID_2 = settings.TUYA_DEVICE_ID_2
+    TUYA_IP_ADDRESS_2 = settings.TUYA_IP_ADDRESS_2
+    TUYA_LOCAL_KEY_2 = settings.TUYA_LOCAL_KEY_2
 except:
     import dev_conf
     TUYA_DEVICE_ID = dev_conf.TUYA_DEVICE_ID
     TUYA_IP_ADDRESS = dev_conf.TUYA_IP_ADDRESS
     TUYA_LOCAL_KEY = dev_conf.TUYA_LOCAL_KEY
+    TUYA_DEVICE_ID_2 = dev_conf.TUYA_DEVICE_ID_2
+    TUYA_IP_ADDRESS_2 = dev_conf.TUYA_IP_ADDRESS_2
+    TUYA_LOCAL_KEY_2 = dev_conf.TUYA_LOCAL_KEY_2
     # from decouple import config
     # TUYA_DEVICE_ID = config('TUYA_DEVICE_ID')
     # TUYA_IP_ADDRESS = config('TUYA_IP_ADDRESS')
@@ -20,9 +26,16 @@ import tinytuya
 
 # Device credentials
 
-d = tinytuya.OutletDevice(TUYA_DEVICE_ID, TUYA_IP_ADDRESS, TUYA_LOCAL_KEY)
-d.set_version(3.3)
 
+ledvance_1 = tinytuya.OutletDevice(TUYA_DEVICE_ID, TUYA_IP_ADDRESS, TUYA_LOCAL_KEY)
+ledvance_1.set_version(3.3)
+ledvance_2 = tinytuya.OutletDevice(TUYA_DEVICE_ID_2, TUYA_IP_ADDRESS_2, TUYA_LOCAL_KEY_2)
+ledvance_2.set_version(3.3)
+
+d = {
+    1: ledvance_1,
+    2: ledvance_2
+}
 """
 DP ID	Function Point	Type	Range	Units
 1	Switch 1	bool	True/False	
@@ -49,48 +62,57 @@ DP ID	Function Point	Type	Range	Units
 24	Power coe	integer	0-1000000	
 25	Electricity coe	integer	0-1000000	
 26	Fault	fault	ov_cr
+
+38 Relay status off/on/memory
 """
 
-def status():
-    data = d.status()
+def status(ledvance=1):
+    data = d[ledvance].status()
     # print('set_status() result %r' % data)
     return data
 
-def turnon(hours=0):
-    d.turn_on(switch=1)
-    d.set_value(9, hours * 60 * 60)  # lülitame välja x tunni aja pärast
+def countdown(ledvance=1, seconds=0):
+    d[ledvance].set_value(9, seconds)
+    data = status(ledvance)
+    return data
+
+def turnon(ledvance=1, hours=0):
+    d[ledvance].turn_on(switch=1)
+    d[ledvance].set_value(9, hours * 60 * 60)  # lülitame välja x tunni aja pärast
     # Show status and state of first controlled switch on device
-    data = status()
+    data = status(ledvance)
     # print('Dictionary %r' % data)
     # print('State (bool, true is ON) %r' % data['dps']['1'])
     return data
 
-def turnoff():
-    d.turn_off(switch=1)
+def turnoff(ledvance=1):
+    d[ledvance].turn_off(switch=1)
     # Show status and state of first controlled switch on device
-    data = status()
+    data = status(ledvance)
     # print('Dictionary %r' % data)
     # print('State (bool, true is ON) %r' % data['dps']['1'])
     return data
 
 if __name__ == '__main__':
+    ledvance = 2
     if len(sys.argv) > 2:
         print('You have specified too many arguments')
         sys.exit()
 
     if len(sys.argv) < 2:
         print('You need to specify the command: 1h 2h off')
-        data = status()
+        data = status(ledvance)
+        # data = countdown(ledvance, seconds=10)
         print(data)
         sys.exit()
 
     command = sys.argv[1]
 
     if command == 'off':
-        turnoff()
+        turnoff(ledvance)
     else:
         try:
             hours = int(command[0])
-            turnon(hours=hours)
+            turnon(ledvance, hours=hours)
         except:
-            turnoff()
+            turnoff(ledvance)

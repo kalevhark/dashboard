@@ -258,7 +258,7 @@ def index(request):
         },
         'yAxis': [{ # Primary yAxis
             'title': {
-                'text': 'Kulu kW/h /Sademed mm',
+                'text': 'Kulu kW/h / Sademed mm',
             },
             'labels': {
                 'format': '{value}',
