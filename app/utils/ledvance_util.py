@@ -33,8 +33,8 @@ ledvance_2 = tinytuya.OutletDevice(TUYA_DEVICE_ID_2, TUYA_IP_ADDRESS_2, TUYA_LOC
 ledvance_2.set_version(3.3)
 
 d = {
-    1: ledvance_1,
-    2: ledvance_2
+    1: ledvance_1, # boiler
+    2: ledvance_2 # j6uluvalgus
 }
 """
 DP ID	Function Point	Type	Range	Units
