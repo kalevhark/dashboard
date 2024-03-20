@@ -15,9 +15,10 @@ try:
     from app.models import Log
     AQUAREA_USR = settings.AQUAREA_USR
     AQUAREA_PWD = settings.AQUAREA_PWD
-    accessToken = settings.AQUAREA_accessToken
-    selectedGwid = settings.AQUAREA_selectedGwid
-    selectedDeviceId = settings.AQUAREA_selectedDeviceId
+    accessToken = settings.AQUAREA_ACCESS_TOKEN
+    selectedGwid = settings.AQUAREA_SELECTEDGWID
+    selectedDeviceId = settings.AQUAREA_SELECTEDDEVICEID
+
 except:
     import os
     import django
