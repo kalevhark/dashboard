@@ -46,7 +46,7 @@ def loe_logiandmed_failist(filename):
     return logiandmed_dict
 
 
-def loe_logiandmed_veebist(hours=12, verbose=False):
+def loe_logiandmed_veebist(hours=12, verbose=True):
     dateTime_last_hours = datetime.now() - timedelta(hours=hours-1)
     dateTime_last_hours_fullhour = datetime(
         dateTime_last_hours.year,
@@ -125,7 +125,7 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
         # Küsime soovitud tundide logi
         logDate = int(dateTime_last_hours_fullhour.timestamp() * 1000)
 
-        items = '%2C'.join([f'{n}' for n in range(0, 77)])  # '%2C' = ','
+        items = '%2C'.join([f'{n}' for n in range(0, 80)])  # '%2C' = ','
         logItems = '%7B%22logItems%22%3A%5B' + items + '%5D%7D'  # '{"logItems":[' + items + ']}'
         ##        params = {
         ##            'var.deviceId': deviceId,
@@ -144,6 +144,7 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
         logiandmed_json = logiandmed_raw.json()
 
         logiandmed_dict = json.loads(logiandmed_json['logData'])
+
         if verbose:
             print('Logiandmed:', logiandmed_dict)
             mxd = int(max(logiandmed_dict.keys())) / 1000
@@ -159,15 +160,15 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
 
     # Töötleme andmed graafiku jaoks
     elements = [
-        34+5,  # Actual outdoor temperature [°C]
-        35+5,  # Inlet water temperature [°C]
-        36+5,  # Outlet water temperature [°C]
-        37+5,  # Zone1: Water temperature [°C]
-        38+5,  # Zone2: Water temperature [°C]
-        65+5,  # Heat mode energy consumption [kW]
-        66+5,  # Heat mode energy generation [kW]
-        69+5,  # Tank mode energy consumption [kW]
-        70+5,  # Tank mode energy generation [kW]
+        41,  # Actual outdoor temperature [°C]
+        42,  # Inlet water temperature [°C]
+        43,  # Outlet water temperature [°C]
+        44,  # Zone1: Water temperature [°C]
+        45,  # Zone2: Water temperature [°C]
+        72,  # Heat mode energy consumption [kW]
+        74,  # Heat mode energy generation [kW]
+        78,  # Tank mode energy consumption [kW]
+        79,  # Tank mode energy generation [kW]
     ]
 
     act_outd_temp = []
@@ -191,30 +192,36 @@ def loe_logiandmed_veebist(hours=12, verbose=False):
         # kuupäev
         cat_date = round((row_date - dateTime_last_hours_fullhour).seconds / 3600, 2)
         # välistemperatuur
-        act_outd_temp.append([cat_date, float_or_none(logiandmed_dict[row][34+5])])
+        act_outd_temp.append([cat_date, float_or_none(logiandmed_dict[row][41])])
         # pumpa sisenev ja väljuv temperatuur
-        ilet_water_temp.append([cat_date, float_or_none(logiandmed_dict[row][35+5])])
-        olet_water_temp.append([cat_date, float_or_none(logiandmed_dict[row][36+5])])
-        z1_water_temp.append([cat_date, float_or_none(logiandmed_dict[row][37+5])])
-        z2_water_temp.append([cat_date, float_or_none(logiandmed_dict[row][38+5])])
-        z1_water_temp_target.append([cat_date, float_or_none(logiandmed_dict[row][39+5])])
-        z2_water_temp_target.append([cat_date, float_or_none(logiandmed_dict[row][40+5])])
-        tank_temp.append([cat_date, float_or_none(logiandmed_dict[row][33+5])])
+        ilet_water_temp.append([cat_date, float_or_none(logiandmed_dict[row][42])])
+        olet_water_temp.append([cat_date, float_or_none(logiandmed_dict[row][43])])
+        z1_water_temp.append([cat_date, float_or_none(logiandmed_dict[row][44])])
+        z2_water_temp.append([cat_date, float_or_none(logiandmed_dict[row][45])])
+        z1_water_temp_target.append([cat_date, float_or_none(logiandmed_dict[row][46])])
+        z2_water_temp_target.append([cat_date, float_or_none(logiandmed_dict[row][47])])
+        tank_temp.append([cat_date, float_or_none(logiandmed_dict[row][40])])
         tank_temp_target.append([cat_date, float_or_none(logiandmed_dict[row][11])])
-        heat_con_row = float_or_none(logiandmed_dict[row][65+5])
-        heat_con.append([cat_date, heat_con_row])
-        tank_con_row = float_or_none(logiandmed_dict[row][69+5])
-        tank_con.append([cat_date, tank_con_row])
-        heat_gen_row = float_or_none(logiandmed_dict[row][66+5])
-        heat_gen.append([cat_date, heat_gen_row])
-        tank_gen_row = float_or_none(logiandmed_dict[row][70+5])
-        tank_gen.append([cat_date, tank_gen_row])
-        tot_gen_row = heat_gen_row + tank_gen_row
+        heat_con_row = logiandmed_dict[row][72]
+        heat_con.append([cat_date, float_or_none(heat_con_row)])
+        tank_con_row = logiandmed_dict[row][78]
+        tank_con.append([cat_date, float_or_none(tank_con_row)])
+        heat_gen_row = logiandmed_dict[row][74]
+        heat_gen.append([cat_date, float_or_none(heat_gen_row)])
+        tank_gen_row = logiandmed_dict[row][79]
+        tank_gen.append([cat_date, float_or_none(tank_gen_row)])
+        if all([float_or_none(heat_gen_row), float_or_none(tank_gen_row)]):
+            tot_gen_row = float_or_none(heat_gen_row) + float_or_none(tank_gen_row)
+        else:
+            tot_gen_row = None
         tot_gen.append([
             cat_date,
             tot_gen_row if tot_gen_row else None
         ])
-        tot_gen_plus_row = tot_gen_row - (heat_con_row + tank_con_row)
+        if all([tot_gen_row, float_or_none(heat_con_row), float_or_none(tank_con_row)]):
+            tot_gen_plus_row = tot_gen_row - (heat_con_row + tank_con_row)
+        else:
+            tot_gen_plus_row = 0
         tot_gen_plus.append([
             cat_date,
             tot_gen_plus_row if tot_gen_plus_row > 0 else None # TODO: kui on negatiivne tootlus
@@ -265,7 +272,7 @@ def get_con_per_1h(temp=0.0):
     return con_per_1h[round(temp, 0)]
 
 if __name__ == "__main__":
-    # data = loe_logiandmed_veebist(hours=11, verbose=True)
+    data = loe_logiandmed_veebist(hours=12, verbose=True)
     print(get_con_per_1h(temp=0.0))
 
 
@@ -340,6 +347,5 @@ if __name__ == "__main__":
 66 Heat mode energy generation [kW]
 67 Cool mode energy consumption [kW]
 68 Cool mode energy generation [kW]
-69 Tank mode energy consumption [kW]
-70 Tank mode energy generation [kW]
+69 Tank mode energy consumption [kW]70 Tank mode energy generation [kW]
 """

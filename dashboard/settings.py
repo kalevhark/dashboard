@@ -147,6 +147,9 @@ CHANNEL_LAYERS = {
 AQUAREA_USR = config('AQUAREA_USR')
 AQUAREA_PWD = config('AQUAREA_PWD')
 AQUAREA_PWD_SERVICE = config('AQUAREA_PWD_SERVICE')
+AQUAREA_accessToken = config('AQUAREA_accessToken')
+AQUAREA_selectedGwid = config('AQUAREA_selectedGwid')
+AQUAREA_selectedDeviceId = config('AQUAREA_selectedDeviceId')
 
 TUYA_USER=config('TUYA_USER')
 TUYA_USER_PASSWORD=config('TUYA_USER_PASSWORD')

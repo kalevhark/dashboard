@@ -15,15 +15,21 @@ try:
     from app.models import Log
     AQUAREA_USR = settings.AQUAREA_USR
     AQUAREA_PWD = settings.AQUAREA_PWD
+    accessToken = settings.AQUAREA_accessToken
+    selectedGwid = settings.AQUAREA_selectedGwid
+    selectedDeviceId = settings.AQUAREA_selectedDeviceId
 except:
     import os
     import django
     # from django.test.utils import setup_test_environment
     os.environ['DJANGO_SETTINGS_MODULE'] = 'dashboard.settings'
     django.setup()
-    import dev_conf
+    from app.utils import dev_conf
     AQUAREA_USR = dev_conf.AQUAREA_USR
     AQUAREA_PWD = dev_conf.AQUAREA_PWD
+    accessToken = dev_conf.AQUAREA_accessToken
+    selectedGwid = dev_conf.AQUAREA_selectedGwid
+    selectedDeviceId = dev_conf.AQUAREA_selectedDeviceId
 
 DEBUG = False
 DEGREE_CELSIUS = u'\N{DEGREE CELSIUS}'
@@ -33,14 +39,45 @@ m2rgiga = lambda i: ("+" if i > 0 else "") + str(i)
 request_kwargs = {
     "login_url": "https://aquarea-smart.panasonic.com/remote/v1/api/auth/login",
     "logout_url": 'https://aquarea-smart.panasonic.com/remote/v1/api/auth/logout',
+    # "headers": {
+    #     "Sec-Fetch-Mode": "cors",
+    #     "Origin": "https://aquarea-smart.panasonic.com",
+    #     "User-Agent": "Mozilla/5.0 (iPad; CPU OS 11_0 like Mac OS X) AppleWebKit/604.1.34 (KHTML, like Gecko) Version/11.0 Mobile/15A5341f Safari/604.1",
+    #     "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    #     "Accept": "*/*",
+    #     "Registration-ID": "",
+    #     "Referer": "https://aquarea-smart.panasonic.com/"
+    # },
     "headers": {
+        "Accept": "application/json, text/javascript, */*; q=0.01",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "et-EE,et;q=0.9,en-US;q=0.8,en;q=0.7",
+        # "Content-Length": "0",
+        "Cookie": "; ".join(
+            [
+                f"accessToken={accessToken}",
+                "OptanonAlertBoxClosed=2024-01-17T18:20:24.107Z",
+                f"selectedGwid={selectedGwid}",
+                f"selectedDeviceId={selectedDeviceId}",
+                "operationDeviceTop=2",
+                "OptanonConsent=isGpcEnabled=0&datestamp=Tue+Mar+19+2024+20%3A25%3A57+GMT%2B0200+(Eastern+European+Standard+Time)&version=202403.1.0&browserGpcFlag=0&isIABGlobal=false&hosts=&consentId=38ba5b4d-3fe3-4e80-9c8b-08b24d0fe9b9&interactionCount=1&landingPath=NotLandingPage&groups=C0001%3A1%2CC0003%3A1%2CC0002%3A1&geolocation=EE%3B81&AwaitingReconsent=false&isAnonUser=1",
+                # "AWSALB=BU0xu4ht+fexZb3YWhaZC/xXFvkhR8fJGxOTXZ6GETXKsZdwEXKQ21v18jXCmPR/68EA2ujhE8wziIP1lVseDGwuIaYGcMR2Sdh/evqhqOW4eriPI8wV27hfczV+",
+                # "AWSALBCORS=BU0xu4ht+fexZb3YWhaZC/xXFvkhR8fJGxOTXZ6GETXKsZdwEXKQ21v18jXCmPR/68EA2ujhE8wziIP1lVseDGwuIaYGcMR2Sdh/evqhqOW4eriPI8wV27hfczV+",
+                # "JSESSIONID=FBF594569A093019A5FF85F2207EA797"
+            ]
+        ),
+        # "Origin": "https://aquarea-smart.panasonic.com",
+        "Popup-Screen-Id": "1023",
+        "Referer": "https://aquarea-smart.panasonic.com/remote/a2wEnergyConsumption",
+        # "Registration-Id": "",
+        "Sec-Ch-Ua": '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+        "Sec-Ch-Ua-Mobile": "?0",
+        "Sec-Ch-Ua-Platform": '"Windows"',
+        "Sec-Fetch-Dest": "empty",
         "Sec-Fetch-Mode": "cors",
-        "Origin": "https://aquarea-smart.panasonic.com",
-        "User-Agent": "Mozilla/5.0 (iPad; CPU OS 11_0 like Mac OS X) AppleWebKit/604.1.34 (KHTML, like Gecko) Version/11.0 Mobile/15A5341f Safari/604.1",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        "Accept": "*/*",
-        "Registration-ID": "",
-        "Referer": "https://aquarea-smart.panasonic.com/"
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "X-Requested-With": "XMLHttpRequest",
     },
     "params": {
         "var.inputOmit": "false",
@@ -94,22 +131,23 @@ def login(verbose=False):
     headers = request_kwargs['headers']
     params = request_kwargs['params']
     with requests.Session() as session:
+        # if verbose:
+        #     print('Küsime võtme... ', end='')
+        # auth_resp = session.post(
+        #     url,
+        #     headers=headers,
+        #     params=params,
+        #     verify=False
+        # )
         if verbose:
-            print('Küsime võtme... ', end='')
-        auth_resp = session.post(
-            url,
-            headers=headers,
-            params=params,
-            verify=False
-        )
-        if verbose:
-            accessToken = auth_resp.cookies['accessToken']
-            print(auth_resp, 'accessToken:', accessToken)
+            # accessToken = auth_resp.cookies['accessToken']
+            # print(auth_resp, 'accessToken:', accessToken)
             print('Logime sisse... ', end='')
+
         login_resp = session.post(
             'https://aquarea-smart.panasonic.com/remote/contract',
             headers=headers,
-            verify=False
+            verify=False,
         )
         if verbose:
             print(login_resp)
@@ -119,14 +157,15 @@ def login(verbose=False):
 # Logib Aquarea APIst välja
 #
 def logout(session):
-    url = request_kwargs['logout_url']
-    headers = request_kwargs['headers']
-    resp = session.post(
-        url,
-        headers=headers,
-        verify=False
-    )
-    return resp
+    return
+    # url = request_kwargs['logout_url']
+    # headers = request_kwargs['headers']
+    # resp = session.post(
+    #     url,
+    #     headers=headers,
+    #     verify=False
+    # )
+    # return resp
 
 #
 # Tagastab Aquarea kulu
@@ -154,7 +193,7 @@ def consum(
             print(date_string, 'andmed andmebaasist')
     else:
         # Küsime andmed Aquarea APIst
-        deviceGuid = session.cookies['selectedDeviceId']
+        # selectedDeviceId = session.cookies['selectedDeviceId']
 
         # Periood liik
         date_string_splits_count = len(date_string.split('-'))
@@ -165,9 +204,8 @@ def consum(
         else:
             period = 'year'
         headers = request_kwargs['headers']
-
         resp = session.get(
-            f'https://aquarea-smart.panasonic.com/remote/v1/api/consumption/{deviceGuid}?{period}={date_string}&_={timestamp}',
+            f'https://aquarea-smart.panasonic.com/remote/v1/api/consumption/{selectedDeviceId}?{period}={date_string}&_={timestamp}',
             headers = headers,
             verify=False
         )
@@ -273,9 +311,9 @@ def get_status(session=None):
     timestamp = timestamp_now()
     headers = request_kwargs['headers']
     # Küsime andmed
-    deviceGuid = session.cookies['selectedDeviceId']
+    # selectedDeviceId = session.cookies['selectedDeviceId']
     resp = session.get(
-        f'https://aquarea-smart.panasonic.com/remote/v1/api/devices/{deviceGuid}?_={timestamp}',
+        f'https://aquarea-smart.panasonic.com/remote/v1/api/devices/{selectedDeviceId}?_={timestamp}',
         headers = headers,
         verify=False
     )
@@ -308,42 +346,41 @@ def set_heat_specialstatus(session=None, special_mode=0, zone1delta=5, zone2delt
     if aquarea_status and aquarea_status['errorCode'] == 0 and aquarea_status['status'][0]['operationStatus'] == 1:
         timestamp = timestamp_now()
         # Küsime andmed
-        deviceGuid = session.cookies['selectedDeviceId']
-        accessToken = session.cookies['accessToken']
-        selectedDeviceId = session.cookies['selectedDeviceId']
-        selectedGwid = session.cookies['selectedGwid']
-        cookies = [
-            f'selectedGwid={selectedGwid}',
-            f'selectedDeviceId={selectedDeviceId}',
-            'operationDeviceTop=1',
-            f'accessToken={accessToken}',
-            f'deviceControlDate={timestamp}'
-        ]
-        headers = {
-            'Host': 'aquarea-smart.panasonic.com',
-            'Connection': 'keep-alive',
-            'Cache-Control': 'max-age=0',
-            'Upgrade-Insecure-Requests': '1',
-            'Origin': 'https://aquarea-smart.panasonic.com',
-            'Content-Type': 'application/json;charset=UTF-8',
-            'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Mobile Safari/537.36',
-            'Accept': 'application/json, text/javascript, */*; q=0.01',
-            'Sec-Fetch-Site': 'same-origin',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-User': '?1',
-            'Sec-Fetch-Dest': 'document',
-            'Referer': 'https://aquarea-smart.panasonic.com/remote/a2wControl',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Accept-Language': 'et-EE,et;q=0.9,en;q=0.8,ja;q=0.7',
-            'Cookie': ';'.join(cookies),
-        }
-
+        # accessToken = session.cookies['accessToken']
+        # selectedDeviceId = session.cookies['selectedDeviceId']
+        # selectedGwid = session.cookies['selectedGwid']
+        # cookies = [
+        #     f'selectedGwid={selectedGwid}',
+        #     f'selectedDeviceId={selectedDeviceId}',
+        #     'operationDeviceTop=1',
+        #     f'accessToken={accessToken}',
+        #     f'deviceControlDate={timestamp}'
+        # ]
+        # headers = {
+        #     'Host': 'aquarea-smart.panasonic.com',
+        #     'Connection': 'keep-alive',
+        #     'Cache-Control': 'max-age=0',
+        #     'Upgrade-Insecure-Requests': '1',
+        #     'Origin': 'https://aquarea-smart.panasonic.com',
+        #     'Content-Type': 'application/json;charset=UTF-8',
+        #     'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Mobile Safari/537.36',
+        #     'Accept': 'application/json, text/javascript, */*; q=0.01',
+        #     'Sec-Fetch-Site': 'same-origin',
+        #     'Sec-Fetch-Mode': 'navigate',
+        #     'Sec-Fetch-User': '?1',
+        #     'Sec-Fetch-Dest': 'document',
+        #     'Referer': 'https://aquarea-smart.panasonic.com/remote/a2wControl',
+        #     'Accept-Encoding': 'gzip, deflate, br',
+        #     'Accept-Language': 'et-EE,et;q=0.9,en;q=0.8,ja;q=0.7',
+        #     'Cookie': ';'.join(cookies),
+        # }
+        headers = request_kwargs['headers']
         specialstatuses = {}
 
         specialstatuses[0] = {
             "status":[
                 {
-                    "deviceGuid":deviceGuid,
+                    "deviceGuid":selectedDeviceId,
                     "specialStatus":0,
                     "zoneStatus":[
                         {"zoneId":1,"heatSet":0,"coolSet":0},
@@ -355,7 +392,7 @@ def set_heat_specialstatus(session=None, special_mode=0, zone1delta=5, zone2delt
         specialstatuses[1]  = {
             "status":[
                 {
-                    "deviceGuid":deviceGuid,
+                    "deviceGuid":selectedDeviceId,
                     "specialStatus":1,
                      "zoneStatus":[
                          {"zoneId":1,"heatSet":-zone1delta,"coolSet":5},
@@ -367,7 +404,7 @@ def set_heat_specialstatus(session=None, special_mode=0, zone1delta=5, zone2delt
         specialstatuses[2] = {
             "status": [
                 {
-                    "deviceGuid": deviceGuid,
+                    "deviceGuid": selectedDeviceId,
                     "specialStatus": 2,
                     "zoneStatus": [
                         {"zoneId": 1, "heatSet": zone1delta, "coolSet": -5},
@@ -379,7 +416,7 @@ def set_heat_specialstatus(session=None, special_mode=0, zone1delta=5, zone2delt
         payload = specialstatuses[special_mode]
 
         resp = session.post(
-            f'https://aquarea-smart.panasonic.com/remote/v1/api/devices/{deviceGuid}',
+            f'https://aquarea-smart.panasonic.com/remote/v1/api/devices/{selectedDeviceId}',
             headers = headers,
             data = json.dumps(payload),
             verify=False
@@ -408,43 +445,43 @@ def set_tank_operationstatus(session=None, operation_status=0, aquarea_status=No
     if aquarea_status and aquarea_status['errorCode'] == 0 and aquarea_status['status'][0]['operationStatus'] == 1:
         timestamp = timestamp_now()
         # Küsime andmed
-        deviceGuid = session.cookies['selectedDeviceId']
-        accessToken = session.cookies['accessToken']
-        selectedDeviceId = session.cookies['selectedDeviceId']
-        selectedGwid = session.cookies['selectedGwid']
-        cookies = [
-            f'selectedGwid={selectedGwid}',
-            f'selectedDeviceId={selectedDeviceId}',
-            'operationDeviceTop=1',
-            f'accessToken={accessToken}',
-            f'deviceControlDate={timestamp}'
-        ]
-        headers = {
-            'Host': 'aquarea-smart.panasonic.com',
-            'Connection': 'keep-alive',
-            'Cache-Control': 'max-age=0',
-            'Upgrade-Insecure-Requests': '1',
-            'Origin': 'https://aquarea-smart.panasonic.com',
-            'Content-Type': 'application/json;charset=UTF-8',
-            'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Mobile Safari/537.36',
-            'Accept': 'application/json, text/javascript, */*; q=0.01',
-            'Sec-Fetch-Site': 'same-origin',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-User': '?1',
-            'Sec-Fetch-Dest': 'document',
-            'Referer': 'https://aquarea-smart.panasonic.com/remote/a2wControl',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Accept-Language': 'et-EE,et;q=0.9,en;q=0.8,ja;q=0.7',
-            'Cookie': ';'.join(cookies),
-        }
-
+        # deviceGuid = session.cookies['selectedDeviceId']
+        # accessToken = session.cookies['accessToken']
+        # selectedDeviceId = session.cookies['selectedDeviceId']
+        # selectedGwid = session.cookies['selectedGwid']
+        # cookies = [
+        #     f'selectedGwid={selectedGwid}',
+        #     f'selectedDeviceId={selectedDeviceId}',
+        #     'operationDeviceTop=1',
+        #     f'accessToken={accessToken}',
+        #     f'deviceControlDate={timestamp}'
+        # ]
+        # headers = {
+        #     'Host': 'aquarea-smart.panasonic.com',
+        #     'Connection': 'keep-alive',
+        #     'Cache-Control': 'max-age=0',
+        #     'Upgrade-Insecure-Requests': '1',
+        #     'Origin': 'https://aquarea-smart.panasonic.com',
+        #     'Content-Type': 'application/json;charset=UTF-8',
+        #     'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Mobile Safari/537.36',
+        #     'Accept': 'application/json, text/javascript, */*; q=0.01',
+        #     'Sec-Fetch-Site': 'same-origin',
+        #     'Sec-Fetch-Mode': 'navigate',
+        #     'Sec-Fetch-User': '?1',
+        #     'Sec-Fetch-Dest': 'document',
+        #     'Referer': 'https://aquarea-smart.panasonic.com/remote/a2wControl',
+        #     'Accept-Encoding': 'gzip, deflate, br',
+        #     'Accept-Language': 'et-EE,et;q=0.9,en;q=0.8,ja;q=0.7',
+        #     'Cookie': ';'.join(cookies),
+        # }
+        headers = request_kwargs['headers']
         # tank temperature set:
-        payload_set_tankStatus = {"status":[{"deviceGuid":deviceGuid,"tankStatus":[{"heatSet":45}]}]}
+        payload_set_tankStatus = {"status":[{"deviceGuid":selectedDeviceId,"tankStatus":[{"heatSet":45}]}]}
 
         payload_set_tankOperation = {
             "status": [
                 {
-                    "deviceGuid": deviceGuid,
+                    "deviceGuid": selectedDeviceId,
                     "operationStatus": 1,
                     "zoneStatus": [
                         {"zoneId": 1, "operationStatus": aquarea_status['status'][0]['zoneStatus'][0]['operationStatus']},
@@ -459,7 +496,7 @@ def set_tank_operationstatus(session=None, operation_status=0, aquarea_status=No
         payload = payload_set_tankOperation
 
         resp = session.post(
-            f'https://aquarea-smart.panasonic.com/remote/v1/api/devices/{deviceGuid}',
+            f'https://aquarea-smart.panasonic.com/remote/v1/api/devices/{selectedDeviceId}',
             headers = headers,
             data = json.dumps(payload),
             verify=False
@@ -495,33 +532,31 @@ def get_weekly_timer(session=None):
 
     # Küsime andmed
     url = 'https://aquarea-smart.panasonic.com/remote/weekly_timer'
-    accessToken = session.cookies['accessToken']
-    selectedDeviceId = session.cookies['selectedDeviceId']
-    selectedGwid = session.cookies['selectedGwid']
-    cookies = [
-        f'selectedGwid={selectedGwid}',
-        f'selectedDeviceId={selectedDeviceId}',
-        'operationDeviceTop=1',
-        f'accessToken={accessToken}',
-    ]
-    headers = {
-        'Host': 'aquarea-smart.panasonic.com',
-        'Connection': 'keep-alive',
-        'Cache-Control': 'max-age=0',
-        'Upgrade-Insecure-Requests': '1',
-        'Origin': 'https://aquarea-smart.panasonic.com',
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Mobile Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-        'Sec-Fetch-Site': 'same-origin',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-User': '?1',
-        'Sec-Fetch-Dest': 'document',
-        'Referer': 'https://aquarea-smart.panasonic.com/remote/a2wStatusDisplay',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept-Language': 'et-EE,et;q=0.9,en;q=0.8,ja;q=0.7',
-        'Cookie': ';'.join(cookies),
-    }
+    # cookies = [
+    #     f'selectedGwid={selectedGwid}',
+    #     f'selectedDeviceId={selectedDeviceId}',
+    #     'operationDeviceTop=1',
+    #     f'accessToken={accessToken}',
+    # ]
+    # headers = {
+    #     'Host': 'aquarea-smart.panasonic.com',
+    #     'Connection': 'keep-alive',
+    #     'Cache-Control': 'max-age=0',
+    #     'Upgrade-Insecure-Requests': '1',
+    #     'Origin': 'https://aquarea-smart.panasonic.com',
+    #     'Content-Type': 'application/x-www-form-urlencoded',
+    #     'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Mobile Safari/537.36',
+    #     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+    #     'Sec-Fetch-Site': 'same-origin',
+    #     'Sec-Fetch-Mode': 'navigate',
+    #     'Sec-Fetch-User': '?1',
+    #     'Sec-Fetch-Dest': 'document',
+    #     'Referer': 'https://aquarea-smart.panasonic.com/remote/a2wStatusDisplay',
+    #     'Accept-Encoding': 'gzip, deflate, br',
+    #     'Accept-Language': 'et-EE,et;q=0.9,en;q=0.8,ja;q=0.7',
+    #     'Cookie': ';'.join(cookies),
+    # }
+    headers = request_kwargs['headers']
 
     # Küsime nädalaseadistuse andmed
     resp = session.post(
@@ -570,35 +605,36 @@ def set_weeklytimer(session=None, mode=2):
     timestamp = timestamp_now()
     # Küsime andmed
     url = 'https://aquarea-smart.panasonic.com/remote/v1/api/data/weeklytimer/'
-    deviceGuid = session.cookies['selectedDeviceId']
-    accessToken = session.cookies['accessToken']
-    selectedDeviceId = session.cookies['selectedDeviceId']
-    selectedGwid = session.cookies['selectedGwid']
-    cookies = [
-        f'selectedGwid={selectedGwid}',
-        f'selectedDeviceId={selectedDeviceId}',
-        'operationDeviceTop=1',
-        f'accessToken={accessToken}',
-        f'deviceControlDate={timestamp}'
-    ]
-    headers = {
-        'Host': 'aquarea-smart.panasonic.com',
-        'Connection': 'keep-alive',
-        'Cache-Control': 'max-age=0',
-        'Upgrade-Insecure-Requests': '1',
-        'Origin': 'https://aquarea-smart.panasonic.com',
-        'Content-Type': 'application/json;charset=UTF-8',
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Mobile Safari/537.36',
-        'Accept': 'application/json, text/javascript, */*; q=0.01',
-        'Sec-Fetch-Site': 'same-origin',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-User': '?1',
-        'Sec-Fetch-Dest': 'document',
-        'Referer': 'https://aquarea-smart.panasonic.com/remote/weekly_timer',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept-Language': 'et-EE,et;q=0.9,en;q=0.8,ja;q=0.7',
-        'Cookie': ';'.join(cookies),
-    }
+    # deviceGuid = session.cookies['selectedDeviceId']
+    # accessToken = session.cookies['accessToken']
+    # selectedDeviceId = session.cookies['selectedDeviceId']
+    # selectedGwid = session.cookies['selectedGwid']
+    # cookies = [
+    #     f'selectedGwid={selectedGwid}',
+    #     f'selectedDeviceId={selectedDeviceId}',
+    #     'operationDeviceTop=1',
+    #     f'accessToken={accessToken}',
+    #     f'deviceControlDate={timestamp}'
+    # ]
+    # headers = {
+    #     'Host': 'aquarea-smart.panasonic.com',
+    #     'Connection': 'keep-alive',
+    #     'Cache-Control': 'max-age=0',
+    #     'Upgrade-Insecure-Requests': '1',
+    #     'Origin': 'https://aquarea-smart.panasonic.com',
+    #     'Content-Type': 'application/json;charset=UTF-8',
+    #     'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Mobile Safari/537.36',
+    #     'Accept': 'application/json, text/javascript, */*; q=0.01',
+    #     'Sec-Fetch-Site': 'same-origin',
+    #     'Sec-Fetch-Mode': 'navigate',
+    #     'Sec-Fetch-User': '?1',
+    #     'Sec-Fetch-Dest': 'document',
+    #     'Referer': 'https://aquarea-smart.panasonic.com/remote/weekly_timer',
+    #     'Accept-Encoding': 'gzip, deflate, br',
+    #     'Accept-Language': 'et-EE,et;q=0.9,en;q=0.8,ja;q=0.7',
+    #     'Cookie': ';'.join(cookies),
+    # }
+    headers = request_kwargs['headers']
 
     # Mode [1:Tank only, 2:Heat, 3:Cool, 8:Auto, 9:Auto(Heat), 10:Auto(Cool)]
     # week 0 = esmaspäev
@@ -671,7 +707,7 @@ def set_weeklytimer(session=None, mode=2):
         "weeklytimer": [
             {
                 "timer": timer,
-                "deviceGuid": deviceGuid,
+                "deviceGuid": selectedDeviceId,
                 "operation": 1,
                 "noUpdateDb": 0,
                 "updateWeek": [0,1,2,3,4,5,6]
@@ -692,7 +728,7 @@ def set_weeklytimer(session=None, mode=2):
     #         )
 
     resp = session.post(
-        f'{url}{deviceGuid}',
+        f'{url}{selectedDeviceId}',
         headers = headers,
         data = json.dumps(payload),
         verify=False
