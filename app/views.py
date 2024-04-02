@@ -373,7 +373,7 @@ def index(request):
                 'yAxis': 0,
                 'pointWidth': 3,
                 'data': [], # last_12hour_consum_tank,
-                'color': '#FF8135',
+                'color': '#0E98BA',
                 'zIndex': 2,
                 'stack': 'aquarea'
             }, {
@@ -426,7 +426,7 @@ def index(request):
                     'pointFormat': '{series.name}: {point.y}<br/>Viimase 30p keskmine: {point.last_30days_prices_mean} s/kWh',
                     'valueSuffix': ' s/kWh'
                 },
-                'zIndex': 1,
+                'zIndex': 5,
                 'dashStyle': 'shortdot',
                 'color': '#9E32A8',
                 # 'negativeColor': '#48AFE8'
