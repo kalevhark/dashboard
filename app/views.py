@@ -308,7 +308,8 @@ def index(request):
                 'stacking': 'normal',
                 'dataLabels': {
                     'enabled': False
-                }
+                },
+                'grouping': False
             }
         },
         'series': [
@@ -348,6 +349,15 @@ def index(request):
                 'color': '#00ff00',
                 'zIndex': 2,
                 'stack': 'aquarea'
+            }, {
+                'id': 'last_12hour_tot_gen_minus',
+                'name': 'Kahju',
+                'yAxis': 0,
+                'pointWidth': 3,
+                'data': [],
+                'color': '#d0312d',
+                'zIndex': 3,
+                # 'stack': 'aquareaminus'
             }, {
                 'id': 'last_12hour_consum_heat',
                 'name': 'Küte',

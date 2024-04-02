@@ -123,6 +123,7 @@ function update_aquarea_serv_data(url, chart) {
       chart.get('last_12hour_consum_heat').update({data: data.heat_con});
       chart.get('last_12hour_consum_tank').update({data: data.tank_con});
       chart.get('last_12hour_tot_gen_plus').update({data: data.tot_gen_plus});
+      chart.get('last_12hour_tot_gen_minus').update({data: data.tot_gen_minus});
 
       let elZone1Status_temp = $('#z1_water_temp');
       elZone1Status_temp.text(data.status.z1_water_temp);

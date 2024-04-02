@@ -26,9 +26,15 @@ import pytz
 
 def float_or_none(datafield:str):
     try:
-        return float(datafield)
+        return round(float(datafield), 1)
     except:
         return None
+
+def float_or_zero(datafield:str):
+    try:
+        return float(datafield)
+    except:
+        return 0
 #
 # Aquarea Service andmete lugemine failist
 #
@@ -70,15 +76,36 @@ def loe_logiandmed_veebist(hours=12, verbose=True):
         'var.password': AQUAREA_PWD_SERVICE,
         'var.inputOmit': 'false'
     }
+    # headers = {
+    #     "Sec-Fetch-Mode": "cors",
+    #     "Origin": "https://aquarea-smart.panasonic.com",
+    #     "User-Agent": "Mozilla/5.0 (iPad; CPU OS 11_0 like Mac OS X) AppleWebKit/604.1.34 (KHTML, like Gecko) Version/11.0 Mobile/15A5341f Safari/604.1",
+    #     "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    #     "Accept": "*/*",
+    #     "Accept-Language": "en;q=0.9,ja;q=0.7",
+    #     "Registration-ID": "",
+    #     "Referer": "https://aquarea-smart.panasonic.com/"
+    # }
     headers = {
-        "Sec-Fetch-Mode": "cors",
-        "Origin": "https://aquarea-smart.panasonic.com",
+        "Host": "aquarea-service.panasonic.com",
+        "Connection": "keep-alive",
+        "Content-Length": "0",
+        "Cache-Control": "max-age=0",
+        "Origin": 'https://aquarea-service.panasonic.com',
+        "Upgrade-Insecure-Requests": "1",
+        "Content-Type": "application/x-www-form-urlencoded",
         "User-Agent": "Mozilla/5.0 (iPad; CPU OS 11_0 like Mac OS X) AppleWebKit/604.1.34 (KHTML, like Gecko) Version/11.0 Mobile/15A5341f Safari/604.1",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        "Accept": "*/*",
-        "Registration-ID": "",
-        "Referer": "https://aquarea-smart.panasonic.com/"
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-User": "?1",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3",
+        "Sec-Fetch-Site": "same-origin",
+        "Referer": 'https://aquarea-service.panasonic.com/installer/home',
+        "Accept-Encoding": "gzip, deflate, br",
+        # "Accept-Language": "et-EE,et;q=0.9,en;q=0.8,ja;q=0.7",
+        "Accept-Language": "en;q=0.9,ja;q=0.7",
+        # "Cookie": f"_ga={_ga}; AWSALB={AWSALB}; AWSALBCORS={AWSALBCORS}; _gid={_gid}; _gat_UA-124399518-17=1; JSESSIONID={JSESSIONID}"
     }
+
     with requests.Session() as session:
         if verbose:
             print('Küsime võtmed...', end=' ')
@@ -125,7 +152,7 @@ def loe_logiandmed_veebist(hours=12, verbose=True):
         # Küsime soovitud tundide logi
         logDate = int(dateTime_last_hours_fullhour.timestamp() * 1000)
 
-        items = '%2C'.join([f'{n}' for n in range(0, 80)])  # '%2C' = ','
+        items = '%2C'.join([f'{n}' for n in range(0, 81)])  # '%2C' = ','
         logItems = '%7B%22logItems%22%3A%5B' + items + '%5D%7D'  # '{"logItems":[' + items + ']}'
         ##        params = {
         ##            'var.deviceId': deviceId,
@@ -140,10 +167,11 @@ def loe_logiandmed_veebist(hours=12, verbose=True):
             '?'.join([LOGINFO_URL, PARAMS]),
             headers=headers
         )
-        # print(logiandmed_raw.status_code)
+        # print(logiandmed_raw.request.headers)
         logiandmed_json = logiandmed_raw.json()
 
         logiandmed_dict = json.loads(logiandmed_json['logData'])
+        # print('Logiandmed:', logiandmed_dict)
 
         if verbose:
             print('Logiandmed:', logiandmed_dict)
@@ -185,9 +213,17 @@ def loe_logiandmed_veebist(hours=12, verbose=True):
     tank_con = []
     tank_gen = []
     tot_gen = []
-    tot_gen_plus = []
+    tot_gen_plus = [] # plusstootlikkus
+    tot_gen_minus = [] # miinustootlikkus
+    status = dict()
 
     for row in logiandmed_dict:
+        # print(
+        #     logiandmed_dict[row][72], # heat con
+        #     logiandmed_dict[row][74], # heat gen
+        #     logiandmed_dict[row][78], # tank con
+        #     logiandmed_dict[row][79], # tank gen
+        # )
         row_date = datetime.fromtimestamp(int(row) / 1000)
         # kuupäev
         cat_date = round((row_date - dateTime_last_hours_fullhour).seconds / 3600, 2)
@@ -210,21 +246,26 @@ def loe_logiandmed_veebist(hours=12, verbose=True):
         heat_gen.append([cat_date, float_or_none(heat_gen_row)])
         tank_gen_row = logiandmed_dict[row][79]
         tank_gen.append([cat_date, float_or_none(tank_gen_row)])
-        if all([float_or_none(heat_gen_row), float_or_none(tank_gen_row)]):
-            tot_gen_row = float_or_none(heat_gen_row) + float_or_none(tank_gen_row)
-        else:
+        # arvutused
+        if heat_con_row == None and tank_con_row == None and heat_gen_row == None and tank_gen_row == None:
             tot_gen_row = None
-        tot_gen.append([
-            cat_date,
-            tot_gen_row if tot_gen_row else None
-        ])
-        if all([tot_gen_row, float_or_none(heat_con_row), float_or_none(tank_con_row)]):
-            tot_gen_plus_row = tot_gen_row - (heat_con_row + tank_con_row)
+            tot_gen_plus_row = None
         else:
-            tot_gen_plus_row = 0
+            tot_gen_row = round(float_or_zero(heat_gen_row) + float_or_zero(tank_gen_row), 1)
+            tot_gen_plus_row = round(tot_gen_row - (float_or_zero(heat_con_row) + float_or_zero(tank_con_row)), 1)
+
+
         tot_gen_plus.append([
             cat_date,
-            tot_gen_plus_row if tot_gen_plus_row > 0 else None # TODO: kui on negatiivne tootlus
+            tot_gen_plus_row if tot_gen_plus_row > 0 else None
+        ])
+        tot_gen_minus.append([
+            cat_date,
+            -1 * tot_gen_plus_row if tot_gen_plus_row < 0 else None
+        ])
+        tot_gen.append([
+            cat_date,
+            tot_gen_row
         ])
         if verbose:
             print(
@@ -255,6 +296,7 @@ def loe_logiandmed_veebist(hours=12, verbose=True):
         'tank_gen': tank_gen,
         'tot_gen': tot_gen,
         'tot_gen_plus': tot_gen_plus,
+        'tot_gen_minus': tot_gen_minus,
         'status': status
     }
     return chart_data
@@ -347,5 +389,6 @@ if __name__ == "__main__":
 66 Heat mode energy generation [kW]
 67 Cool mode energy consumption [kW]
 68 Cool mode energy generation [kW]
-69 Tank mode energy consumption [kW]70 Tank mode energy generation [kW]
+69 Tank mode energy consumption [kW]
+70 Tank mode energy generation [kW]
 """

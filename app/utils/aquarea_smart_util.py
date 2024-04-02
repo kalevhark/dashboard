@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import json
 import re
+import time
 
 import urllib3
 # Vaigistame ssl veateated
@@ -743,6 +744,59 @@ def set_weeklytimer(session=None, mode=2):
     if do_logout:
         _ = logout(session)
     return status_data
+
+
+def update_db(year=None, month=None):
+    now = datetime.now()
+    year = year if year is not None else now.year
+    month = month if month is not None else now.month
+    dt = datetime(year, month, 1) - timedelta(days=30)
+    session, _ = login()
+    while dt < (datetime.now() - timedelta(days=1)):
+        dateString = dt.strftime('%Y-%m-%d')
+        if not Log.objects.filter(data__dateString=dateString).exists():
+            consum(session=session, date_string=dateString, verbose=True)
+            time.sleep(5)
+        dt = dt + timedelta(days=1)
+
+def get_hind_hour(date_string: str, consum_hour: tuple) -> int:
+    pyhad = [
+        datetime(2024, 2, 24),
+        datetime(2024, 3, 29)
+    ]
+    EE_normaal = 12.56
+    EE_soodus = 12.56
+    EL_normaal = 8.32
+    EL_soodus = 5.40
+    day = datetime.strptime(date_string, '%Y-%m-%d')
+    if day in pyhad: # riigipyha
+        return consum_hour[1] * (EE_soodus + EL_soodus)
+    if day.weekday() in [5, 6]: # L v6i P
+        return consum_hour[1] * (EE_soodus + EL_soodus)
+    if consum_hour[0] < 7 or consum_hour[0] >= 22:
+        return consum_hour[1] * (EE_soodus + EL_soodus)
+    return consum_hour[1] * (EE_normaal + EL_normaal)
+
+def calc_consume_month(year=None, month=None):
+    now = datetime.now()
+    year = year if year is not None else now.year
+    month = month if month is not None else now.month
+    month_string = f'{year}-{month:02d}-'
+    log_days = Log.objects.filter(data__dateString__startswith=month_string)
+    sum_month = 0
+    hind_month = 0
+    for log_day in log_days:
+        d = log_day.data['dateData'][0]['dataSets'][0]['data']
+        for el in d:
+            if el['name'] in ['Heat', 'HW']:
+                sum_element = sum([hour for hour in el['values'] if hour != None])
+                print(log_day.data['dateString'], el['name'], el['values'], sum_element)
+                sum_month = sum_month + sum_element
+                for consum_hour in enumerate(el['values']):
+                    if consum_hour[1] != None:
+                        hind_hour = get_hind_hour(log_day.data['dateString'], consum_hour)
+                        hind_month = hind_month + hind_hour
+    print(round(sum_month, 1), round(hind_month/100, 2))
 
 if __name__ == "__main__":
     session, login_resp = login(verbose=True)
