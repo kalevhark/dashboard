@@ -480,7 +480,7 @@ def set_tank_operationstatus(session=None, operation_status=0, aquarea_status=No
         # tank temperature set:
         payload_set_tankStatus = {"status":[{"deviceGuid":selectedDeviceId,"tankStatus":[{"heatSet":45}]}]}
 
-        payload_set_tankOperation = {
+        payload = {
             "status": [
                 {
                     "deviceGuid": selectedDeviceId,
@@ -495,12 +495,10 @@ def set_tank_operationstatus(session=None, operation_status=0, aquarea_status=No
             ]
         }
 
-        payload = payload_set_tankOperation
-
-        resp = session.post(
+        resp = requests.post(
             f'https://aquarea-smart.panasonic.com/remote/v1/api/devices/{selectedDeviceId}',
             headers = headers,
-            data = json.dumps(payload),
+            data = json.dumps(payload_set_tankStatus),
             verify=False
         )
         try:

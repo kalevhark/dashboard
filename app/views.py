@@ -178,7 +178,7 @@ def get_yrno_forecast(request=None, hours=12):
 # Andmed põrandakütte juhtseadmelt
 def get_ezr_data(request=None):
     # Loeme Ilmateenistuse viimase mõõtmise andmed veebist
-    href = 'http://192.168.1.205/data/static.xml'
+    href = f'http://{settings.EZR_IP_ADDRESS}/data/static.xml'
     r = requests.get(href)
     try:
         root = ET.fromstring(r.text)
