@@ -135,6 +135,7 @@ def change_tank_status(session, aquarea_status):
 
 def change_ledvance_status(aquarea_status):
     ledvance_status = ledvance_util.status()
+    print(ledvance_status)
     ledvance_on = ledvance_status['dps']['1']
     if aquarea_status and aquarea_status['errorCode'] == 0:
         # Aquarea registreeritud välistemperatuur
