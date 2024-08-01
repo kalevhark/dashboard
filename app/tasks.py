@@ -159,7 +159,7 @@ def change_ledvance_status(aquarea_status):
 if __name__ == '__main__':
     session, _ = aquarea_smart_util.login()
     aquarea_status = aquarea_smart_util.get_status(session)
-    # print(aquarea_status)
+    print(aquarea_status['accessToken'])
     result = change_special_status(session, aquarea_status) # normal, eco, comfort
     if result:
         print('heat:', [f'{key}: {value}' for key, value in result.items()])
