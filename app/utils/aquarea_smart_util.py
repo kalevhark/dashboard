@@ -1,9 +1,12 @@
 from datetime import datetime, timedelta
+import html
 import json
 import re
 import time
-
+from typing import Optional
+import urllib.parse
 import urllib3
+
 # Vaigistame ssl veateated
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -33,6 +36,23 @@ except:
     selectedGwid = dev_conf.AQUAREA_selectedGwid
     selectedDeviceId = dev_conf.AQUAREA_selectedDeviceId
 
+AQUAREA_SERVICE_BASE = "https://aquarea-smart.panasonic.com/"
+AQUAREA_SERVICE_LOGIN = "remote/v1/api/auth/login"
+AQUAREA_SERVICE_DEVICES = "remote/v1/api/devices"
+AQUAREA_SERVICE_CONSUMPTION = "remote/v1/api/consumption"
+AQUAREA_SERVICE_CONTRACT = "remote/contract"
+AQUAREA_SERVICE_A2W_STATUS_DISPLAY = "remote/a2wStatusDisplay"
+AQUAREA_SERVICE_AUTH_CLIENT_ID = "vf2i6hW5hA2BB2BQGfTHXM4YFyW4I06K"
+AQUAREA_SERVICE_AUTH0_CLIENT = "eyJuYW1lIjoiYXV0aDAuanMtdWxwIiwidmVyc2lvbiI6IjkuMjMuMiJ9"
+
+_HEADERS = {
+    "Cache-Control": "max-age=0",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+    "Accept-Encoding": "deflate, br",
+    "Upgrade-Insecure-Requests": "1",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko/20100101 Firefox/74.0",
+}
+
 DEBUG = False
 DEGREE_CELSIUS = u'\N{DEGREE CELSIUS}'
 
@@ -41,15 +61,6 @@ m2rgiga = lambda i: ("+" if i > 0 else "") + str(i)
 request_kwargs = {
     "login_url": "https://aquarea-smart.panasonic.com/remote/v1/api/auth/login",
     "logout_url": 'https://aquarea-smart.panasonic.com/remote/v1/api/auth/logout',
-    # "headers": {
-    #     "Sec-Fetch-Mode": "cors",
-    #     "Origin": "https://aquarea-smart.panasonic.com",
-    #     "User-Agent": "Mozilla/5.0 (iPad; CPU OS 11_0 like Mac OS X) AppleWebKit/604.1.34 (KHTML, like Gecko) Version/11.0 Mobile/15A5341f Safari/604.1",
-    #     "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-    #     "Accept": "*/*",
-    #     "Registration-ID": "",
-    #     "Referer": "https://aquarea-smart.panasonic.com/"
-    # },
     "headers": {
         "Accept": "application/json, text/javascript, */*; q=0.01",
         "Accept-Encoding": "gzip, deflate, br, zstd",
@@ -125,10 +136,225 @@ def check_log_dates(tarbimisandmed):
     # print(periood, perioodi_algus, logi_vanus)
     return check
 
+def request(
+    session: requests.Session,
+    method: str,
+    url: str = None,
+    external_url: str = None,
+    referer: str = AQUAREA_SERVICE_BASE,
+    throw_on_error=True,
+    content_type: str = "application/x-www-form-urlencoded",
+    **kwargs,
+):
+    """Make a request to Aquarea and return the response."""
+
+    headers = _HEADERS.copy()
+    request_headers = kwargs.get("headers", {})
+    headers.update(request_headers)
+    headers["referer"] = referer
+    headers["content-type"] = content_type
+    kwargs["headers"] = headers
+
+    if external_url is not None:
+        url = external_url
+    else:
+        url = AQUAREA_SERVICE_BASE + url
+
+    resp = session.request(method, url, **kwargs)
+
+    if resp.headers['Content-Type'] == "application/json":
+        data = resp.json()
+        print(data)
+
+        # let's check for access token and expiration time
+        # if _access_token and __contains_valid_token(data):
+        #     _access_token = data["accessToken"]["token"]
+        #     _token_expiration = dt.datetime.strptime(
+        #         data["accessToken"]["expires"], "%Y-%m-%dT%H:%M:%S%z"
+        #     )
+
+        # Aquarea returns a 200 even if the request failed, we need to check the message property to see if it's an error
+        # Some errors just require to login again, so we raise a AuthenticationError in those known cases
+        # errors = [FaultError]
+        # if throw_on_error:
+        #     errors = look_for_errors(data)
+        #     # If we have errors, let's look for authentication errors
+        #     for error in errors:
+        #         if error.error_code in list(AuthenticationErrorCodes):
+        #             raise AuthenticationError(error.error_code, error.error_message)
+        #
+        #         raise ApiError(error.error_code, error.error_message)
+
+    return resp
+
+def __complete_login(
+        session: requests.Session(),
+        location: str):
+    """Complete the login process."""
+
+    response = request(
+        session,
+        "GET",
+        external_url=location,
+        referer=AQUAREA_SERVICE_BASE,
+        allow_redirects=False)
+
+    # _access_token = session.cookies.get("accessToken")
+    # print(_access_token)
+    # _token_expiration = None
+    return session, response
+
+def __is_final_step(location: str) -> bool:
+    """Check if the location is the final step of the login process."""
+    parsed = urllib.parse.urlparse(location)
+    return parsed.hostname == "aquarea-smart.panasonic.com" and parsed.path == "/authorizationCallback" and "code" in urllib.parse.parse_qs(
+        parsed.query)
+
+
 #
-# autendib kasutaja ja tagastab avatud sessiooni
+# autendib kasutaja ja tagastab avatud sessiooni vana
 #
 def login(verbose=False):
+    with requests.Session() as session:
+        response = request(
+            session,
+            "POST",
+            AQUAREA_SERVICE_LOGIN,
+            referer=AQUAREA_SERVICE_BASE,
+            headers={
+                "popup-screen-id": "1001",
+                "Registration-Id": "",
+            }
+        )
+
+        auth_state = response.cookies.get("com.auth0.state")
+        query_params = {
+            "client_id": AQUAREA_SERVICE_AUTH_CLIENT_ID,
+            "audience": f"https://digital.panasonic.com/{AQUAREA_SERVICE_AUTH_CLIENT_ID}/api/v1/",
+            "response_type": "code",
+            "redirect_uri": "https://aquarea-smart.panasonic.com/authorizationCallback",
+            "state": auth_state,
+            "scope": "openid offline_access",
+        }
+
+        response = request(
+            session,
+            "GET",
+            external_url="https://authglb.digital.panasonic.com/authorize",
+            referer=AQUAREA_SERVICE_BASE,
+            params=query_params,
+            allow_redirects=False)
+
+        location = response.headers.get("Location")
+
+        # We might be already on the last step of the login process if we're refreshing the token
+        if __is_final_step(location):
+            return __complete_login(session, location)
+
+        # We continue with the login process
+        parsed_url = urllib.parse.urlparse(location)
+
+        # Extract the value of the 'state' query parameter
+        query_params2 = urllib.parse.parse_qs(parsed_url.query)
+        state_value = query_params2.get('state', [None])[0]
+
+        response = request(
+            session,
+            "GET",
+            external_url=f"https://authglb.digital.panasonic.com{location}",
+            referer=AQUAREA_SERVICE_BASE,
+            allow_redirects=False)
+
+        csrf = response.cookies.get("_csrf")
+
+        query_params = {
+            "audience": f"https://digital.panasonic.com/{AQUAREA_SERVICE_AUTH_CLIENT_ID}/api/v1/",
+            "client": AQUAREA_SERVICE_AUTH_CLIENT_ID,
+            'protocol': 'oauth2',
+            'redirect_uri': 'https://aquarea-smart.panasonic.com/authorizationCallback',
+            "response_type": "code",
+            "state": state_value,
+            "scope": "openid offline_access",
+        }
+
+        data = {
+            'client_id': AQUAREA_SERVICE_AUTH_CLIENT_ID,
+            'redirect_uri': 'https://aquarea-smart.panasonic.com/authorizationCallback?lang=en',
+            'tenant': 'pdpauthglb-a1',
+            'response_type': 'code',
+            'scope': 'openid offline_access',
+            'audience': f'https://digital.panasonic.com/{AQUAREA_SERVICE_AUTH_CLIENT_ID}/api/v1/',
+            '_csrf': csrf,
+            'state': state_value,
+            '_intstate': 'deprecated',
+            'username': AQUAREA_USR,
+            'password': AQUAREA_PWD,
+            'lang': 'en',
+            'connection': 'PanasonicID-Authentication',
+        }
+
+        response = request(
+            session,
+            "POST",
+            external_url="https://authglb.digital.panasonic.com/usernamepassword/login",
+            referer=f"https://authglb.digital.panasonic.com/login?{urllib.parse.urlencode(query_params)}",
+            content_type="application/json; charset=UTF-8",
+            headers={
+                "Auth0-Client": AQUAREA_SERVICE_AUTH0_CLIENT,
+            },
+            allow_redirects=False,
+            json=data,
+            throw_on_error=False)
+
+        if not response.ok and response.headers['Content-Type'] == "application/json":
+            data = response.json()
+            if data.get("code") == "invalid_user_password":
+                # raise AuthenticationError(AuthenticationErrorCodes.INVALID_USERNAME_OR_PASSWORD, "Invalid username or password")
+                pass
+
+        content = response.text
+        action_url = re.search(r'action="(.+?)"', content).group(1)
+        inputs = re.findall(r'<input([^\0]+?)>', content, flags=re.IGNORECASE)
+
+        form_data = {}
+        for input in inputs:
+            name = None
+            value = None
+            name_match = re.search(r'name="(.+?)"', input)
+            if name_match is not None:
+                name = name_match.group(1)
+            value = re.search(r'value="(.+?)"', input)
+            if (name and value):
+                form_data[name] = html.unescape(value.group(1))
+
+        response = request(
+            session,
+            "POST",
+            external_url=action_url,
+            referer=f"https://authglb.digital.panasonic.com/login?{urllib.parse.urlencode(query_params)}",
+            content_type="application/x-www-form-urlencoded; charset=UTF-8",
+            allow_redirects=False,
+            data=urllib.parse.urlencode(form_data))
+
+        location = response.headers.get("Location")
+
+        response = request(
+            session,
+            "GET",
+            external_url=f"https://authglb.digital.panasonic.com{location}",
+            referer=AQUAREA_SERVICE_BASE,
+            allow_redirects=False)
+
+        location = response.headers.get("Location")
+
+        if __is_final_step(location):
+            return __complete_login(session, location)
+
+    return session, response
+#
+# autendib kasutaja ja tagastab avatud sessiooni vana
+#
+def login_old(verbose=False):
     url = request_kwargs['login_url']
     headers = request_kwargs['headers']
     params = request_kwargs['params']
@@ -205,7 +431,21 @@ def consum(
             period = 'month'
         else:
             period = 'year'
-        headers = request_kwargs['headers']
+
+        # headers = request_kwargs['headers']
+        headers = _HEADERS.copy()
+        _access_token = session.cookies.get("accessToken")
+        headers["Cookie"] = "; ".join(
+            [
+                f"accessToken={_access_token}",
+                "OptanonAlertBoxClosed=2024-01-17T18:20:24.107Z",
+                f"selectedGwid={selectedGwid}",
+                f"selectedDeviceId={selectedDeviceId}",
+                "operationDeviceTop=2",
+                "OptanonConsent=isGpcEnabled=0&datestamp=Tue+Mar+19+2024+20%3A25%3A57+GMT%2B0200+(Eastern+European+Standard+Time)&version=202403.1.0&browserGpcFlag=0&isIABGlobal=false&hosts=&consentId=38ba5b4d-3fe3-4e80-9c8b-08b24d0fe9b9&interactionCount=1&landingPath=NotLandingPage&groups=C0001%3A1%2CC0003%3A1%2CC0002%3A1&geolocation=EE%3B81&AwaitingReconsent=false&isAnonUser=1",
+            ]
+        )
+
         resp = session.get(
             f'https://aquarea-smart.panasonic.com/remote/v1/api/consumption/{selectedDeviceId}?{period}={date_string}&_={timestamp}',
             headers = headers,
@@ -311,7 +551,8 @@ def get_status(session=None):
     else:
         do_logout = False
     timestamp = timestamp_now()
-    headers = request_kwargs['headers']
+    # headers = request_kwargs['headers']
+    headers = _HEADERS
     # Küsime andmed
     # selectedDeviceId = session.cookies['selectedDeviceId']
     resp = session.get(
@@ -376,7 +617,8 @@ def set_heat_specialstatus(session=None, special_mode=0, zone1delta=5, zone2delt
         #     'Accept-Language': 'et-EE,et;q=0.9,en;q=0.8,ja;q=0.7',
         #     'Cookie': ';'.join(cookies),
         # }
-        headers = request_kwargs['headers']
+        # headers = request_kwargs['headers']
+        headers = _HEADERS
         specialstatuses = {}
 
         specialstatuses[0] = {
@@ -476,7 +718,8 @@ def set_tank_operationstatus(session=None, operation_status=0, aquarea_status=No
         #     'Accept-Language': 'et-EE,et;q=0.9,en;q=0.8,ja;q=0.7',
         #     'Cookie': ';'.join(cookies),
         # }
-        headers = request_kwargs['headers']
+        # headers = request_kwargs['headers']
+        headers = _HEADERS
         # tank temperature set:
         payload_set_tankStatus = {"status":[{"deviceGuid":selectedDeviceId,"tankStatus":[{"heatSet":45}]}]}
 
@@ -556,7 +799,8 @@ def get_weekly_timer(session=None):
     #     'Accept-Language': 'et-EE,et;q=0.9,en;q=0.8,ja;q=0.7',
     #     'Cookie': ';'.join(cookies),
     # }
-    headers = request_kwargs['headers']
+    # headers = request_kwargs['headers']
+    headers = _HEADERS
 
     # Küsime nädalaseadistuse andmed
     resp = session.post(
@@ -634,7 +878,8 @@ def set_weeklytimer(session=None, mode=2):
     #     'Accept-Language': 'et-EE,et;q=0.9,en;q=0.8,ja;q=0.7',
     #     'Cookie': ';'.join(cookies),
     # }
-    headers = request_kwargs['headers']
+    # headers = request_kwargs['headers']
+    headers = _HEADERS
 
     # Mode [1:Tank only, 2:Heat, 3:Cool, 8:Auto, 9:Auto(Heat), 10:Auto(Cool)]
     # week 0 = esmaspäev
@@ -798,7 +1043,7 @@ def calc_consume_month(year=None, month=None):
 
 if __name__ == "__main__":
     session, login_resp = login(verbose=True)
-    print(login_resp)
+    # print(login_resp)
     aquarea_status = get_status(session)
     # print(aquarea_status)
     print(json.dumps(aquarea_status, indent=4))
@@ -812,12 +1057,12 @@ if __name__ == "__main__":
     # print(resp)
     # status = get_status(session)
     # print(status)
-    # timer = weekly_timer(session)
-    # print(timer)
-    # con_day = consum(session, date_string='2022-03-31', verbose=True)
+    timer = get_weekly_timer(session)
+    print(timer)
+    con_day = consum(session, date_string='2024-08-02', verbose=True)
     # con_mon = consum(session, date_string='2021-12', verbose=True)
     # con_year = consum(session, date_string='2021', verbose=True)
     # resp = set_weeklytimer(session)
-    # print(resp)
+    print(con_day)
     _ = logout(session)
     # print(con_day)
