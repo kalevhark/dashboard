@@ -462,6 +462,7 @@ def get_aquarea_smrt_data_day(request):
     # Tänane kulu
     t2na_string = t2na.strftime('%Y-%m-%d')
     t2na_consum = aqsmrt.consum(session, t2na_string)
+    # print(t2na_consum)
     t2na_heat = sum(filter(None, t2na_consum['dateData'][0]['dataSets'][0]['data'][0]['values']))
     t2na_tank = sum(filter(None, t2na_consum['dateData'][0]['dataSets'][0]['data'][2]['values']))
 
@@ -484,7 +485,8 @@ def get_aquarea_smrt_data_day(request):
     # categories = [f'{hour.hour}' for hour in date_today_range_24h]
     # Küsime andmed
     date_today_hour = t2na.hour
-    last12_range_start, last12_range_end = 24 + date_today_hour - 11, 24 + date_today_hour + 1
+    # last12_range_start, last12_range_end = 24 + date_today_hour - 11, 24 + date_today_hour + 1
+    last12_range_start, last12_range_end = 24 + date_today_hour - 12, 24 + date_today_hour + 0
     # Täna
     date_today_consum_heat = t2na_consum['dateData'][0]['dataSets'][0]['data'][0]['values']
     date_today_consum_tank = t2na_consum['dateData'][0]['dataSets'][0]['data'][2]['values']

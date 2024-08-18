@@ -1,3 +1,6 @@
+# Osaliselt kasutatud:
+# Asynchronous library to control Panasonic Aquarea devices https://github.com/cjaliaga/aioaquarea lahendust
+
 from datetime import datetime, timedelta
 import html
 import json
