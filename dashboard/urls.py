@@ -5,7 +5,10 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 
+from app import views as appviews
+
 urlpatterns = [
+    path('', appviews.index, name='index'),
     path('app/', include('app.urls')),
     path('chat/', include('chat.urls')),
     path('admin/', admin.site.urls),

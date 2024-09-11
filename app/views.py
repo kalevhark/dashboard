@@ -18,6 +18,7 @@ import app.utils.aquarea_service_util as aqserv
 import app.utils.aquarea_smart_util as aqsmrt
 from app.utils.astral_util import get_day_or_night_plotbands
 import app.utils.ephem_util as ephem_data
+from app.utils import ledvance_util
 import app.utils.nps_util as nps_util
 
 DEBUG = False
@@ -680,7 +681,7 @@ def get_aquarea_smrt_data_year(request):
     }
     return JsonResponse(aquarea_data)
 
-def get_tuyaapi_data(request):
+def get_tuyaapi_data_old(request):
     TUYA_DEVICE_ID = settings.TUYA_DEVICE_ID
     TUYA_IP_ADDRESS = settings.TUYA_IP_ADDRESS
     TUYA_LOCAL_KEY = settings.TUYA_LOCAL_KEY
@@ -688,6 +689,15 @@ def get_tuyaapi_data(request):
     d.set_version(3.3)
     tuyaapi_data = d.status()
     return JsonResponse(tuyaapi_data)
+
+
+def get_tuyaapi_data(request):
+    data = ledvance_util.status()
+    return JsonResponse(data)
+
+def turnon_ledvance(request):
+    data = ledvance_util.turnon(ledvance=1, hours=1)
+    return JsonResponse(data)
 
 def get_nps_12plus12_hours_data(request):
     nps_12plus12_hour_prices_data = nps_util.get_nps_12plus12_hour_prices_ee_marginaaliga()

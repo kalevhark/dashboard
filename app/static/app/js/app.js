@@ -446,7 +446,7 @@ function update_ezr_data(url) {
 
 function update_get_tuyaapi_data(url, chart) {
   // Küsime:
-  // - aquarea selle ja eelmise perioodi andmed
+  // - ledvance lyliti andmed
   $.ajax({
     url: url,
     dataType: 'json',
@@ -466,11 +466,52 @@ function update_get_tuyaapi_data(url, chart) {
         let m = addZero(d.getMinutes());
         let s = addZero(d.getSeconds());
         el.title = "kuni: " + h + ":" + m + ":" + s;
-        el.style.visibility = "visible";
+        el.style.opacity = "1";
+      } else {
+        // console.log('OFF');
+        el.title = "";
+        el.style.opacity = "0";
+      }
+      // $('#jooksva_perioodi_tot').text((data.jooksva_perioodi_heat+data.jooksva_perioodi_tank).toFixed(1));
+    },
+    error: function (XMLHttpRequest, textstatus, errorThrown) {
+	  console.log(XMLHttpRequest, textstatus, errorThrown);
+    },
+	complete: function () {
+	  // $("#loaderDiv3").hide();
+	}
+  });
+}
+
+function turnon_ledvance(url, chart) {
+  // Saadame:
+  // - ledvance lyliti sisselylitamise
+  // Saame:
+  // - staatuse andmed
+  $.ajax({
+    url: url,
+    dataType: 'json',
+    timeout: 300000,
+	  beforeSend: function() {
+      // $("#loaderDiv3").show();
+    },
+    success: function (data) {
+      console.log(data);
+      let el = document.getElementById("img23a");
+      if (data.dps['1']) {
+        // console.log('ON');
+        let secondsLeft = Number(data.dps['9'])
+        const d = new Date();
+        d.setSeconds(secondsLeft);
+        let h = addZero(d.getHours());
+        let m = addZero(d.getMinutes());
+        let s = addZero(d.getSeconds());
+        el.title = "kuni: " + h + ":" + m + ":" + s;
+        el.style.opacity = "1";
       } else {
         // console.log('OFF');
         el.title = null;
-        el.style.visibility = "hidden";
+        el.style.opacity = "0";
       }
       // $('#jooksva_perioodi_tot').text((data.jooksva_perioodi_heat+data.jooksva_perioodi_tank).toFixed(1));
     },

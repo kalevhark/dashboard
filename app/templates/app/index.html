@@ -97,7 +97,13 @@
 <div class="wrapper">
   <div class="counter col_fourth">
     <img id="img23" width="50" height="50" src="{% static 'app/images/icon_tank.png' %}" />
-    <i id="img23a" class="fa fa-flash fired"></i>
+    <div id="img23a" class="fired-ledvance">
+      <i width="50" height="50" class="fa fa-plug"></i>
+    </div>
+    <div id="img23b" class="fired-force-dhw">
+      <img width="50" height="50" src="{% static 'app/images/heat_pump.png' %}" />
+    </div>
+
     <h1
             id="tankStatus_temp_now"
             class="timer count-title count-number format_celsius"
@@ -288,6 +294,42 @@ $(document).ready(function() {
 
   const url_get_aquarea_smrt_data_month = "{% url 'app:get_aquarea_smrt_data_month' %}";
   // update_aquarea_smrt_data_month(url_get_aquarea_smrt_data_month, chart_24h);
+
+  const firedLedvanceDiv = document.getElementById("img23a");
+  firedLedvanceDiv.addEventListener("click", (event) => {
+    let text = "Lülitame boileri sisse?"
+    if (confirm(text) === true) {
+      const url_turnon_ledvance = "{% url 'app:turnon_ledvance' %}";
+      turnon_ledvance(url_turnon_ledvance, chart_24h);
+    }
+  })
+  firedLedvanceDiv.addEventListener('mouseover',function() {
+    const initialOpacity = firedLedvanceDiv.style.opacity;
+    if (initialOpacity !== "1") {
+      firedLedvanceDiv.style.opacity = "0.2";
+      firedLedvanceDiv.addEventListener('mouseleave', function () {
+        firedLedvanceDiv.style.opacity = "0";
+      }, {once:true})
+    }
+  })
+
+  const firedForceDHWDiv = document.getElementById("img23b");
+  firedForceDHWDiv.addEventListener("click", (event) => {
+    let text = "Lülitame tarbevee soojendamise sisse?"
+    if (confirm(text) === true) {
+      const url_turnon_ledvance = "{% url 'app:turnon_ledvance' %}";
+      // turnon_ledvance(url_turnon_ledvance, chart_24h);
+    }
+  })
+  firedForceDHWDiv.addEventListener('mouseover',function() {
+    const initialOpacity = firedForceDHWDiv.style.opacity;
+    if (initialOpacity !== "1") {
+      firedForceDHWDiv.style.opacity = "0.2";
+      firedForceDHWDiv.addEventListener('mouseleave', function () {
+        firedForceDHWDiv.style.opacity = "0";
+      }, {once:true})
+    }
+  })
 
   // vajalik, et ära oodata päevaandmete küsimine
   function updateMonth () {
